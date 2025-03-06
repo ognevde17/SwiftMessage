@@ -8,8 +8,14 @@ include_directories(
     /opt/homebrew/Cellar/boost/1.87.0/include
 )
 
-file(GLOB_RECURSE SOURCES  
+file(GLOB_RECURSE SERVER_SOURCES  
     "src/server/*.cpp"
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+file(GLOB_RECURSE CLIENT_SOURCES  
+    "src/client/*.cpp"
+)
+
+add_executable(${PROJECT_NAME}_Server ${SERVER_SOURCES})
+
+add_executable(${PROJECT_NAME}_Client ${CLIENT_SOURCES})
