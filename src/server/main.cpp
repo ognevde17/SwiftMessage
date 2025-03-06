@@ -1,5 +1,5 @@
 //
-// blocking_udp_echo_server.cpp
+// blocking_tcp_echo_server.cpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2003-2024 Christopher M. Kohlhoff (chris at kohlhoff dot com)
@@ -12,28 +12,48 @@
 #include <boost/asio/ts/internet.hpp>
 #include <cstdlib>
 #include <iostream>
+#include <thread>
+#include <utility>
 
-using boost::asio::ip::udp;
+using boost::asio::ip::tcp;
 
-enum { max_length = 1024 };
+const int max_length = 1024;
+
+void session(tcp::socket sock) {
+  try {
+    for (;;) {
+      char data[max_length];
+
+      boost::system::error_code error;
+      size_t length = sock.read_some(boost::asio::buffer(data), error);
+      if (error == boost::asio::stream_errc::eof)
+        break;  // Connection closed cleanly by peer.
+      else if (error)
+        throw boost::system::system_error(error);  // Some other error.
+
+      std::cout << "Принял: ";
+      std::cout.write(data, length);
+      std::cout << '\n';
+      boost::asio::write(sock, boost::asio::buffer(data, length));
+    }
+  } catch (std::exception& e) {
+    std::cerr << "Exception in thread: " << e.what() << "\n";
+  }
+}
 
 void server(boost::asio::io_context& io_context, unsigned short port) {
-  udp::socket sock(io_context, udp::endpoint(udp::v4(), port));
+  tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
   for (;;) {
-    char data[max_length];
-    udp::endpoint sender_endpoint;
-    size_t length = sock.receive_from(boost::asio::buffer(data, max_length),
-                                      sender_endpoint);
-    std::cout << "Я принял сообщение: ";
-    std::cout.write(data, length) << '\n';
-    sock.send_to(boost::asio::buffer(data, length), sender_endpoint);
+    tcp::socket sock(io_context);
+    a.accept(sock);
+    std::thread(session, std::move(sock)).detach();
   }
 }
 
 int main(int argc, char* argv[]) {
   try {
     if (argc != 2) {
-      std::cerr << "Usage: blocking_udp_echo_server <port>\n";
+      std::cerr << "Usage: blocking_tcp_echo_server <port>\n";
       return 1;
     }
 
