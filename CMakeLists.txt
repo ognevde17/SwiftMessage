@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(
-    /opt/homebrew/Cellar/boost/1.87.0/include
+    /home/dan/project/boost_1_82_0
 )
 
 file(GLOB_RECURSE SERVER_SOURCES  
