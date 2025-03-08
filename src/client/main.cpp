@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
       char reply[max_length];
       size_t reply_length =
           boost::asio::read(s, boost::asio::buffer(reply, request_length));
-      std::cout << "Ответ с сервера lohy: ";
+      std::cout << "Ответ с сервера: ";
       std::cout.write(reply, reply_length);
       std::cout << "\n";
     }
