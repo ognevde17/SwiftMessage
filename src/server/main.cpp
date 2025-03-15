@@ -8,8 +8,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <boost/asio/ts/buffer.hpp>
-#include <boost/asio/ts/internet.hpp>
+#include <boost/asio.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <thread>
@@ -26,14 +25,11 @@ void session(tcp::socket sock) {
 
       boost::system::error_code error;
       size_t length = sock.read_some(boost::asio::buffer(data), error);
-      if (error == boost::asio::stream_errc::eof)
+      if (error == boost::asio::error::eof)
         break;  // Connection closed cleanly by peer.
       else if (error)
         throw boost::system::system_error(error);  // Some other error.
 
-      std::cout << "Принял: ";
-      std::cout.write(data, length);
-      std::cout << '\n';
       boost::asio::write(sock, boost::asio::buffer(data, length));
     }
   } catch (std::exception& e) {
@@ -44,9 +40,8 @@ void session(tcp::socket sock) {
 void server(boost::asio::io_context& io_context, unsigned short port) {
   tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
   for (;;) {
-    tcp::socket sock(io_context);
-    a.accept(sock);
-    std::thread(session, std::move(sock)).detach();
+    // std::thread(session, a.accept()).detach();
+    session(a.accept());
   }
 }
 
