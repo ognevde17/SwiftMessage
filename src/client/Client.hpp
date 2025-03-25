@@ -13,6 +13,9 @@ class Client {
         return false;
       }
     }
+    ~Client() {
+      Disconnect();
+    }
     void Disconnect() {
       is_running_ = false;
       receiver_thread_.detach();
@@ -31,6 +34,7 @@ class Client {
         SendMessage(id, message);
         std::cin >> message;
       }
+      Disconnect();
     }
     void Receive() {
       while (is_running_) {
