@@ -9,6 +9,7 @@
 //
 
 #include <boost/asio.hpp>
+#include "../screen_handler/server_screen.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <thread>
@@ -18,7 +19,7 @@ using boost::asio::ip::tcp;
 
 const int max_length = 1024;
 
-void session(tcp::socket sock) {
+void session(tcp::socket sock, ServerScreen& server_win) {
   try {
     for (;;) {
       char data[max_length];
@@ -30,6 +31,8 @@ void session(tcp::socket sock) {
       else if (error)
         throw boost::system::system_error(error);  // Some other error.
 
+      std::string message(data, length);
+      server_win.display_message(message);
       boost::asio::write(sock, boost::asio::buffer(data, length));
     }
   } catch (std::exception& e) {
@@ -37,11 +40,11 @@ void session(tcp::socket sock) {
   }
 }
 
-void server(boost::asio::io_context& io_context, unsigned short port) {
+void server(boost::asio::io_context& io_context, unsigned short port, ServerScreen& server_win) {
   tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
   for (;;) {
     // std::thread(session, a.accept()).detach();
-    session(a.accept());
+    session(a.accept(), server_win);
   }
 }
 
@@ -52,9 +55,10 @@ int main(int argc, char* argv[]) {
       return 1;
     }
 
+    ServerScreen server_win;
     boost::asio::io_context io_context;
 
-    server(io_context, std::atoi(argv[1]));
+    server(io_context, std::atoi(argv[1]), server_win);
   } catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
   }
