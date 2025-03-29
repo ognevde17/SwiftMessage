@@ -8,21 +8,25 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include <boost/asio.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <boost/asio.hpp>
+#include <string>
+#include <vector>
 
 using boost::asio::ip::tcp;
 
+namespace Constants {
+const std::string SERVER_IP_ADDRESS = "127.0.0.1";
+const std::string SERVER_PORT = "1234";
+};  // namespace Constants
+
 enum { max_length = 1024 };
 
-int main(int argc, char* argv[])
-{
-  try
-  {
-    if (argc != 3)
-    {
+int main(int argc, char* argv[]) {
+  try {
+    if (argc != 3) {
       std::cerr << "Usage: blocking_tcp_echo_client <host> <port>\n";
       return 1;
     }
@@ -30,24 +34,26 @@ int main(int argc, char* argv[])
     boost::asio::io_context io_context;
 
     tcp::socket s(io_context);
+
     tcp::resolver resolver(io_context);
-    boost::asio::connect(s, resolver.resolve(argv[1], argv[2]));
 
-    std::cout << "Enter message: ";
-    char request[max_length];
-    std::cin.getline(request, max_length);
-    size_t request_length = std::strlen(request);
-    boost::asio::write(s, boost::asio::buffer(request, request_length));
+    boost::asio::connect(s, resolver.resolve(Constants::SERVER_IP_ADDRESS, Constants::SERVER_PORT));
 
-    char reply[max_length];
-    size_t reply_length = boost::asio::read(s,
-        boost::asio::buffer(reply, request_length));
-    std::cout << "Reply is: ";
-    std::cout.write(reply, reply_length);
-    std::cout << "\n";
-  }
-  catch (std::exception& e)
-  {
+    while (true) {
+      std::cout << "Enter message: ";
+      char request[max_length];
+      std::cin.getline(request, max_length);
+      size_t request_length = std::strlen(request);
+      boost::asio::write(s, boost::asio::buffer(request, request_length));
+
+      char reply[max_length];
+      size_t reply_length =
+          boost::asio::read(s, boost::asio::buffer(reply, request_length));
+      std::cout << "Reply is: ";
+      std::cout.write(reply, reply_length);
+      std::cout << "\n";
+    }
+  } catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
   }
 

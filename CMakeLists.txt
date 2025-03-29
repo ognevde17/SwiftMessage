@@ -4,18 +4,38 @@ project(SwiftMessage)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(
-    /opt/homebrew/Cellar/boost/1.87.0/include
+# Find required packages
+find_package(Boost REQUIRED COMPONENTS system thread serialization)
+
+# Add include directories
+include_directories(${PROJECT_SOURCE_DIR}/include)
+
+# Server executable
+add_executable(server
+    src/server/main.cpp
+    src/server/database_manager.cpp
+    src/server/connection_manager.cpp
+    src/server/request_manager.cpp
+    src/server/server.cpp
 )
 
-file(GLOB_RECURSE SERVER_SOURCES  
-    "src/server/*.cpp"
+# Link libraries for server
+target_link_libraries(server
+    PRIVATE
+    Boost::system
+    Boost::thread
+    Boost::serialization
 )
 
-file(GLOB_RECURSE CLIENT_SOURCES  
-    "src/client/*.cpp"
+# Client executable
+add_executable(client
+    src/client/main.cpp
 )
 
-add_executable(${PROJECT_NAME}_Server ${SERVER_SOURCES})
-
-add_executable(${PROJECT_NAME}_Client ${CLIENT_SOURCES})
+# Link libraries for client
+target_link_libraries(client
+    PRIVATE
+    Boost::system
+    Boost::thread
+    Boost::serialization
+)
