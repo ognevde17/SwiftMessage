@@ -4,14 +4,14 @@ project(SwiftMessage)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find required packages
+set(SERVER_NAME ${PROJECT_NAME}_Server)
+set(CLIENT_NAME ${PROJECT_NAME}_Client)
+
 find_package(Boost REQUIRED COMPONENTS system thread serialization)
 
-# Add include directories
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# Server executable
-add_executable(server
+add_executable(${SERVER_NAME}
     src/server/main.cpp
     src/server/database_manager.cpp
     src/server/connection_manager.cpp
@@ -19,21 +19,18 @@ add_executable(server
     src/server/server.cpp
 )
 
-# Link libraries for server
-target_link_libraries(server
+target_link_libraries(${SERVER_NAME}
     PRIVATE
     Boost::system
     Boost::thread
     Boost::serialization
 )
 
-# Client executable
-add_executable(client
+add_executable(${CLIENT_NAME}
     src/client/main.cpp
 )
 
-# Link libraries for client
-target_link_libraries(client
+target_link_libraries(${CLIENT_NAME}
     PRIVATE
     Boost::system
     Boost::thread
