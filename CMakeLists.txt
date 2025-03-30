@@ -28,6 +28,8 @@ target_link_libraries(${SERVER_NAME}
 
 add_executable(${CLIENT_NAME}
     src/client/main.cpp
+    src/client/connection_manager.cpp
+    src/client/client.cpp
 )
 
 target_link_libraries(${CLIENT_NAME}
