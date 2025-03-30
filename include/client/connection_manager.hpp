@@ -21,10 +21,8 @@ class ClientConnectionManager {
 
  private:
   boost::asio::io_context io_context;
-
   tcp::socket socket;
   std::string ip;
   std::string port;
-
   bool is_connected;
 };

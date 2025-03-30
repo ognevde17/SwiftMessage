@@ -14,9 +14,9 @@ class Client {
 
   void Disconnect();
 
-  void SendMessage(const std::string& id, const std::string& message);
+  void SendMessage(const std::string& sender_login, const std::string& rec_login, const std::string& message);
 
-  void StartMessage(const std::string& id);
+  void StartMessage(const std::string& sender_login, const std::string& rec_login);
 
   void Receive();
 
@@ -33,4 +33,5 @@ class Client {
   std::atomic<bool> is_running_;
 
   std::thread receiver_thread_;
+  std::string user_login = "";
 };

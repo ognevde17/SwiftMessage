@@ -1,4 +1,5 @@
 #include "../../include/client/client.hpp"
+#include "../../include/common/messages.hpp"
 
 Client::Client(const std::string& server_ip, const std::string& server_port)
     : server_ip_(server_ip),
@@ -24,17 +25,21 @@ void Client::Disconnect() {
   return;
 }
 
-void Client::SendMessage(const std::string& id, const std::string& message) {
-  if (!connection_.send(id + ":" + message)) {
+void Client::SendMessage(const std::string& sender_login,const std::string& rec_login, const std::string& message) {
+  SendMessageRequest data;
+  data.message_text = message;
+  data.recipient_login = rec_login;
+  data.sender_login = sender_login;
+  if (!connection_.send(data.to_string())) {
     std::cerr << "sended failed\n";
   }
 }
 
-void Client::StartMessage(const std::string& id) {
+void Client::StartMessage(const std::string& sender_login, const std::string& rec_login) {
   std::string message;
   std::cin >> message;
   while (message != "endendend") {
-    SendMessage(id, message);
+    SendMessage(sender_login, rec_login, message);
     std::cin >> message;
   }
   Disconnect();
@@ -44,8 +49,9 @@ void Client::Receive() {
   while (is_running_) {
     try {
       std::string received = connection_.receive(1024);
-      if (!received.empty()) {
-        std::cout << received << std::endl;
+      SendMessageRequest data = SendMessageRequest::from_string(received);
+      if (!data.message_text.empty()) {
+        std::cout << data.message_text << std::endl;
       }
     } catch (...) {
       if (is_running_) {
