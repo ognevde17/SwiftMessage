@@ -18,11 +18,11 @@ class ClientConnectionManager {
   bool send(const std::string& message);
 
   std::string receive(size_t length);
-
+  bool is_connected;
  private:
   boost::asio::io_context io_context;
   tcp::socket socket;
   std::string ip;
   std::string port;
-  bool is_connected;
+  
 };

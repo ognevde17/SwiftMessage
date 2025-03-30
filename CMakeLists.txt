@@ -7,9 +7,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SERVER_NAME ${PROJECT_NAME}_Server)
 set(CLIENT_NAME ${PROJECT_NAME}_Client)
 
-find_package(Boost REQUIRED COMPONENTS system thread serialization)
+# Настройка Boost
+set(BOOST_ROOT "/home/dan/project/boost_1_87_0")
+set(Boost_INCLUDE_DIR "/home/dan/project/boost_1_87_0")
+set(Boost_LIBRARY_DIR "/home/dan/project/boost_1_87_0/stage/lib")
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_NO_SYSTEM_PATHS ON)
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+# Добавить недостающие компоненты
+find_package(Boost REQUIRED COMPONENTS system thread serialization chrono atomic)
+
+# Включить директории Boost в пути включения
+include_directories(
+    ${PROJECT_SOURCE_DIR}/include
+    ${Boost_INCLUDE_DIR}
+)
 
 add_executable(${SERVER_NAME}
     src/server/main.cpp
@@ -21,9 +33,11 @@ add_executable(${SERVER_NAME}
 
 target_link_libraries(${SERVER_NAME}
     PRIVATE
-    Boost::system
-    Boost::thread
-    Boost::serialization
+    ${Boost_LIBRARY_DIR}/libboost_system.a
+    ${Boost_LIBRARY_DIR}/libboost_thread.a
+    ${Boost_LIBRARY_DIR}/libboost_serialization.a
+    ${Boost_LIBRARY_DIR}/libboost_chrono.a
+    ${Boost_LIBRARY_DIR}/libboost_atomic.a
 )
 
 add_executable(${CLIENT_NAME}
@@ -34,7 +48,9 @@ add_executable(${CLIENT_NAME}
 
 target_link_libraries(${CLIENT_NAME}
     PRIVATE
-    Boost::system
-    Boost::thread
-    Boost::serialization
+    ${Boost_LIBRARY_DIR}/libboost_system.a
+    ${Boost_LIBRARY_DIR}/libboost_thread.a
+    ${Boost_LIBRARY_DIR}/libboost_serialization.a
+    ${Boost_LIBRARY_DIR}/libboost_chrono.a
+    ${Boost_LIBRARY_DIR}/libboost_atomic.a
 )
