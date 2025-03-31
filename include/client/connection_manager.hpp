@@ -16,7 +16,7 @@ class ClientConnectionManager {
   void Disconnect();
 
   bool send(const std::string& message);
-
+  bool SendAuthRequest(const std::string& login, const std::string& password);
   std::string receive(size_t length);
   bool is_connected;
  private:

@@ -51,6 +51,13 @@ struct ServerResponse : BaseMessage {
     oa << *this;
     return oss.str();
   }
+  static ServerResponse from_string(const std::string& data) {
+    std::istringstream iss(data);
+    boost::archive::text_iarchive ia(iss);
+    ServerResponse result;
+    ia >> result;
+    return result;
+  }
 };
 
 // ------------------------- ServerResponse END -------------------------

@@ -21,6 +21,8 @@ class Client {
   void Receive();
 
   void StartReceive();
+  bool Authenticate();
+  std::string user_login = "";
 
  private:
   std::string username_;
@@ -33,5 +35,4 @@ class Client {
   std::atomic<bool> is_running_;
 
   std::thread receiver_thread_;
-  std::string user_login = "";
 };

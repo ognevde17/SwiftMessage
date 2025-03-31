@@ -1,4 +1,5 @@
 #include "../../include/client/connection_manager.hpp"
+#include "../../include/common/messages.hpp"
 
 ClientConnectionManager::ClientConnectionManager(std::string ip,
                                                  const std::string& port)
@@ -45,5 +46,22 @@ std::string ClientConnectionManager::receive(size_t length) {
   } catch (std::exception& e) {
     std::cerr << "receive fail\n";
     throw;
+  }
+}
+bool ClientConnectionManager::SendAuthRequest(const std::string& login, const std::string& password) {
+  try {
+    AuthRequest request;
+    request.login = login;
+    request.password = password;
+    boost::asio::write(socket, boost::asio::buffer(request.to_string()));
+    std::vector<char> reply(1024);
+    size_t reply_length = socket.read_some(boost::asio::buffer(reply));
+    std::string server_reply = std::string(reply.data(), reply_length);
+    ServerResponse response = ServerResponse::from_string(server_reply);
+    if (response.response_text == "auth_success") {
+      return true;
+    } else return false;
+  } catch (...) {
+    return false;
   }
 }
