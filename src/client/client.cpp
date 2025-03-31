@@ -25,7 +25,9 @@ void Client::Disconnect() {
   return;
 }
 
-void Client::SendMessage(const std::string& sender_login,const std::string& rec_login, const std::string& message) {
+void Client::SendMessage(const std::string& sender_login,
+                         const std::string& rec_login,
+                         const std::string& message) {
   SendMessageRequest data;
   data.message_text = message;
   data.recipient_login = rec_login;
@@ -35,11 +37,14 @@ void Client::SendMessage(const std::string& sender_login,const std::string& rec_
   }
 }
 
-void Client::StartMessage(const std::string& sender_login, const std::string& rec_login) {
+void Client::StartMessage(const std::string& sender_login,
+                          const std::string& rec_login) {
   std::string message;
+  // std::cin >> message;
   std::getline(std::cin, message);
   while (message != "endendend") {
     SendMessage(sender_login, rec_login, message);
+    // std::cin >> message;
     std::getline(std::cin, message);
   }
   Disconnect();
@@ -48,8 +53,10 @@ void Client::StartMessage(const std::string& sender_login, const std::string& re
 void Client::Receive() {
   while (is_running_) {
     if (!connection_.is_connected) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
       continue;
     }
+
     try {
       std::string received = connection_.receive(1024);
       SendMessageRequest data = SendMessageRequest::from_string(received);

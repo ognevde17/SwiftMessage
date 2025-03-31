@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
+
 project(SwiftMessage)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(SERVER_NAME ${PROJECT_NAME}_Server)
 set(CLIENT_NAME ${PROJECT_NAME}_Client)
 
@@ -48,9 +48,7 @@ add_executable(${CLIENT_NAME}
 
 target_link_libraries(${CLIENT_NAME}
     PRIVATE
-    ${Boost_LIBRARY_DIR}/libboost_system.a
-    ${Boost_LIBRARY_DIR}/libboost_thread.a
-    ${Boost_LIBRARY_DIR}/libboost_serialization.a
-    ${Boost_LIBRARY_DIR}/libboost_chrono.a
-    ${Boost_LIBRARY_DIR}/libboost_atomic.a
+    Boost::system
+    Boost::thread
+    Boost::serialization
 )

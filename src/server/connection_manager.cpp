@@ -5,16 +5,19 @@ std::mutex client_id_to_socket_mutex_;
 std::map<int, tcp::socket> ConnectionManager::client_id_to_socket_;
 
 ConnectionManager::ConnectionManager()
-    : acceptor_(
-          io, tcp::endpoint(tcp::v4(), Constants::SERVER_PORT_UNSIGNED_SHORT)) {
-}
+    : acceptor_(io, tcp::endpoint(boost::asio::ip::make_address("0.0.0.0"),
+                                  Constants::SERVER_PORT_UNSIGNED_SHORT)) {}
 
 int ConnectionManager::AcceptNewClient() {
   tcp::socket socket = acceptor_.accept();
 
   int client_id = GenerateClientId();
 
+  std::cout << "OK1" << std::endl;
+
   AddClientSocket(client_id, std::move(socket));
+
+  std::cout << "OK2" << std::endl;
 
   return client_id;
 }

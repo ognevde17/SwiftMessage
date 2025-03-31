@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <boost/serialization/string.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/string.hpp>
+#include <sstream>
+#include <string>
 
 // ------------------------- BaseMessage START -------------------------
 
@@ -37,8 +37,9 @@ struct ServerResponse : BaseMessage {
   std::string response_text;
 
   ServerResponse() : BaseMessage("SERVER_RESPONSE") {}
-  ServerResponse(const std::string& response_text) : BaseMessage("SERVER_RESPONSE"), response_text(response_text) {}
-  
+  ServerResponse(const std::string& response_text)
+      : BaseMessage("SERVER_RESPONSE"), response_text(response_text) {}
+
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
     ar & request_type;
@@ -50,6 +51,14 @@ struct ServerResponse : BaseMessage {
     boost::archive::text_oarchive oa(oss);
     oa << *this;
     return oss.str();
+  }
+
+  static ServerResponse from_string(const std::string& data) {
+    std::istringstream iss(data);
+    boost::archive::text_iarchive ia(iss);
+    ServerResponse result;
+    ia >> result;
+    return result;
   }
 };
 

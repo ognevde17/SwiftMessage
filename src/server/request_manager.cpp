@@ -2,6 +2,7 @@
 
 void RequestManager::HandleRequest(const std::string& request) {
   BaseMessage base_request = BaseMessage::GetRequestType(request);
+  
   if (base_request.request_type == "AUTH_REQUEST") {
     AuthRequest auth_request = AuthRequest::from_string(request);
 
@@ -21,7 +22,7 @@ void RequestManager::HandleRequest(const std::string& request) {
   } else if (base_request.request_type == "SEND_MESSAGE") {
     SendMessageRequest send_message_request =
         SendMessageRequest::from_string(request);
-
+    std::cout << "send_message_request.recipient_login: " << send_message_request.recipient_login << std::endl;
     ConnectionManager::SendData(DatabaseManager::GetClientIdByLogin(
                                     send_message_request.recipient_login),
                                 send_message_request.to_string());
