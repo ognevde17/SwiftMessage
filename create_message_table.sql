@@ -1,1 +1,0 @@
-CREATE TABLE IF NOT EXISTS "Message" (message_id SERIAL PRIMARY KEY, sender_id INT REFERENCES "User"(used_id), receiver_id INT REFERENCES "User"(used_id), chat_id INT REFERENCES "Chat"(chat_id), content TEXT, is_read BOOLEAN DEFAULT FALSE, is_edited BOOLEAN DEFAULT FALSE, sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);

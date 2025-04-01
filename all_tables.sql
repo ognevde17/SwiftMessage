@@ -1,5 +1,0 @@
-CREATE TABLE IF NOT EXISTS "User" (used_id SERIAL PRIMARY KEY, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, email VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, last_seen_at TIMESTAMP);
-CREATE TABLE IF NOT EXISTS "Chat" (chat_id SERIAL PRIMARY KEY, chat_name VARCHAR(255), chat_type VARCHAR(50));
-CREATE TABLE IF NOT EXISTS "Message" (message_id SERIAL PRIMARY KEY, sender_id INT REFERENCES "User"(used_id), receiver_id INT REFERENCES "User"(used_id), chat_id INT REFERENCES "Chat"(chat_id), content TEXT, is_read BOOLEAN DEFAULT FALSE, is_edited BOOLEAN DEFAULT FALSE, sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
-CREATE TABLE IF NOT EXISTS "MediaFile" (file_id SERIAL PRIMARY KEY, message_id INT REFERENCES "Message"(message_id), file_url TEXT, file_type VARCHAR(50));
-CREATE TABLE IF NOT EXISTS "ChatParticipant" (participant_id SERIAL PRIMARY KEY, user_id INT REFERENCES "User"(used_id), chat_id INT REFERENCES "Chat"(chat_id), permissions INT DEFAULT 0, UNIQUE(user_id, chat_id));
