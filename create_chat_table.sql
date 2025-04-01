@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS "Chat" (chat_id SERIAL PRIMARY KEY, chat_name VARCHAR(255), chat_type VARCHAR(50));

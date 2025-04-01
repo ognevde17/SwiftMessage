@@ -4,9 +4,11 @@
 #include <vector>
 #include <memory>
 #include <pqxx/pqxx>
-#include "user.hpp"
-#include "chat.hpp"
-#include "message.hpp"
+
+// Предварительные объявления классов
+class User;
+class Chat;
+class Message;
 
 class DatabaseManager {
 public:
@@ -14,12 +16,10 @@ public:
     ~DatabaseManager();
 
     // Управление пользователями
-    bool IsClientCorrectLoginAndPassword(const std::string& login, const std::string& password);
     bool CreateUser(const std::string& login, const std::string& password);
     bool AuthenticateUser(const std::string& login, const std::string& password);
     std::vector<User> GetUsers();
     User GetUserById(int user_id);
-    int GetClientIdByLogin(const std::string& login);
 
     // Управление чатами
     bool CreateChat(int user_id1, int user_id2);

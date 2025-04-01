@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS "ChatParticipant" (participant_id SERIAL PRIMARY KEY, user_id INT REFERENCES "User"(used_id), chat_id INT REFERENCES "Chat"(chat_id), permissions INT DEFAULT 0, UNIQUE(user_id, chat_id));

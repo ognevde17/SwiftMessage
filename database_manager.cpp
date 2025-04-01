@@ -1,5 +1,7 @@
-#include "../../include/server/database_manager.hpp"
-#include "../../include/server/user.hpp"
+#include "database_manager.hpp"
+#include "user.hpp"
+#include "chat.hpp"
+#include "message.hpp"
 
 DatabaseManager::DatabaseManager(const std::string& connection_string) {
     try {
@@ -12,22 +14,6 @@ DatabaseManager::DatabaseManager(const std::string& connection_string) {
 DatabaseManager::~DatabaseManager() {
     if (db_connection && db_connection->is_open()) {
         db_connection->close();
-    }
-}
-
-bool DatabaseManager::IsClientCorrectLoginAndPassword(
-    const std::string& login, const std::string& password) {
-    try {
-        pqxx::work txn(*db_connection);
-        auto result = txn.exec_params(
-            "SELECT COUNT(*) FROM \"User\" WHERE username = $1 AND password = $2",
-            login,
-            password
-        );
-        txn.commit();
-        return result[0][0].as<int>() > 0;
-    } catch (const std::exception& e) {
-        return false;
     }
 }
 
@@ -236,23 +222,4 @@ std::vector<Message> DatabaseManager::GetChatMessages(int chat_id) {
         // Логирование ошибки
     }
     return messages;
-}
-
-int DatabaseManager::GetClientIdByLogin(const std::string& login) {
-    try {
-        pqxx::work txn(*db_connection);
-        auto result = txn.exec_params(
-            "SELECT used_id FROM \"User\" WHERE username = $1",
-            login
-        );
-        
-        if (result.empty()) {
-            throw std::runtime_error("User not found");
-        }
-
-        txn.commit();
-        return result[0]["used_id"].as<int>();
-    } catch (const std::exception& e) {
-        throw std::runtime_error("Failed to get user ID: " + std::string(e.what()));
-    }
-}
+} 

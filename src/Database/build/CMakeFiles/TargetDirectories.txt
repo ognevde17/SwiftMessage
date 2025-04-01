@@ -1,0 +1,3 @@
+/Users/mikhailnarizhnyy/Projects/SwiftMessage/src/Database/build/CMakeFiles/SwiftMessage_Database.dir
+/Users/mikhailnarizhnyy/Projects/SwiftMessage/src/Database/build/CMakeFiles/edit_cache.dir
+/Users/mikhailnarizhnyy/Projects/SwiftMessage/src/Database/build/CMakeFiles/rebuild_cache.dir
