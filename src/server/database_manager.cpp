@@ -49,7 +49,7 @@ bool DatabaseManager::CreateUser(const std::string& login, const std::string& pa
         txn.exec_params(
             "INSERT INTO \"User\" (username, password) VALUES ($1, $2)",
             login,
-            password  // В реальном приложении пароль должен быть захэширован
+            password
         );
 
         txn.commit();
@@ -66,7 +66,7 @@ bool DatabaseManager::AuthenticateUser(const std::string& login, const std::stri
         auto result = txn.exec_params(
             "SELECT COUNT(*) FROM \"User\" WHERE username = $1 AND password = $2",
             login,
-            password  // В реальном приложении сравнение должно быть с хэшем
+            password
         );
 
         txn.commit();
