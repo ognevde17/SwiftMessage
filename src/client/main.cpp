@@ -12,7 +12,8 @@
 #include <cstring>
 #include <iostream>
 #include <boost/asio.hpp>
-#include "../screen_handler/chat_screen.hpp"
+#include "../screen_handler/greeting_screen.hpp"
+#include "../screen_handler/old_chat_screen.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -23,37 +24,22 @@ int main(int argc, char* argv[]) {
       return 1;
     }
 
-    ChatScreen client_win(argv[1], argv[2]);
     boost::asio::io_context io_context;
-
     tcp::socket s(io_context);
     tcp::resolver resolver(io_context);
 
+    GreetingScreen greeting_screen;
+    bool is_pressed = false;
+    while (!is_pressed) {
+      is_pressed = greeting_screen.handle_input();
+    }
+
+    ChatScreen client_win(argv[1], argv[2]);
     client_win.update_status("Connecting...");
     boost::asio::connect(s, resolver.resolve(argv[1], argv[2]));
     client_win.update_status("Connected");
     client_win.add_message("Type 'exit' to quit");
-
     while (true) {
-//      int ch = client_win.get_input_key();
-//      if (ch == KEY_ENTER) {
-//        continue;
-//      }
-//      if (ch == KEY_UP || ch == KEY_DOWN) {
-//        client_win.handle_scroll(ch);
-//        continue;
-//      } else if (ch != ERR) {
-//        client_win.entering_message(static_cast<char>(ch));
-//        std::string request = client_win.get_request();
-//        if (request == "exit") {
-//          client_win.add_message("Disconnecting...");
-//          break;
-//        }
-//        client_win.add_message(request);
-//        boost::asio::write(s, boost::asio::buffer(request));
-//        client_win.catch_reply(s);
-//      }
-//
       if (client_win.process_input()) {
         std::string request = client_win.get_request();
         if (request == "exit") {
