@@ -6,6 +6,7 @@
 #define SWIFTMESSAGE_SRC_SCREEN_HANDLER_INTERFACE_HPP_
 
 #include "greeting_screen.hpp"
+#include "old_chat_screen.hpp"
 
 class Interface {
  public:
@@ -17,8 +18,12 @@ class Interface {
     }
   }
 
+  void RenderChat(std::vector<std::pair<std::string, bool>>& messages) {
+  }
+
  protected:
  private:
+  ChatScreen chat_screen_;
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_INTERFACE_HPP_
