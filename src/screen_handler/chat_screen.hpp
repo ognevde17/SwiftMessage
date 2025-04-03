@@ -11,13 +11,6 @@
 
 enum { max_length = 1024 };
 
-enum ColorPairs {
-  CONTACTS_PAIR = 1,
-  CHAT_PAIR,
-  REPLY_PAIR,
-  INPUT_PAIR
-};
-
 class ChatScreen : public AbstractScreen {
  public:
   ChatScreen(std::string&& host, std::string&& port)

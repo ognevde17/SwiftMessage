@@ -5,8 +5,19 @@
 #ifndef SWIFTMESSAGE_SRC_SCREEN_HANDLER_ABSTRACT_SCREEN_HPP_
 #define SWIFTMESSAGE_SRC_SCREEN_HANDLER_ABSTRACT_SCREEN_HPP_
 
+#pragma once
+
 #include <ncurses.h>
 #include <string>
+
+enum ColorPairs {
+  CONTACTS_PAIR = 1,
+  CHAT_PAIR,
+  REPLY_PAIR,
+  INPUT_PAIR,
+  BUTTON_PAIR,
+  GREETING_SCREEN_PAIR
+};
 
 class AbstractScreen {
  public:
