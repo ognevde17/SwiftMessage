@@ -2,8 +2,8 @@
 // Created by sheyme on 18/03/25.
 //
 
-#ifndef SWIFTMESSAGE_SRC_SCREEN_HANDLER_CLIENT_SCREEN_HPP_
-#define SWIFTMESSAGE_SRC_SCREEN_HANDLER_CLIENT_SCREEN_HPP_
+#ifndef SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_
+#define SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_
 
 #include <boost/asio.hpp>
 #include <vector>
@@ -11,9 +11,16 @@
 
 enum { max_length = 1024 };
 
-class ClientScreen : public AbstractScreen {
+enum ColorPairs {
+  CONTACTS_PAIR = 1,
+  CHAT_PAIR,
+  REPLY_PAIR,
+  INPUT_PAIR
+};
+
+class ChatScreen : public AbstractScreen {
  public:
-  ClientScreen(std::string&& host, std::string&& port)
+  ChatScreen(std::string&& host, std::string&& port)
       : AbstractScreen(),
         host_(std::move(host)),
         port_(std::move(port)) {
@@ -40,43 +47,34 @@ class ClientScreen : public AbstractScreen {
     redraw_chat();
   }
 
-  int get_input_key() {
-    nodelay(input_win_, true);
-    int ch = wgetch(input_win_);
-    nodelay(input_win_, false);
-    return ch;
-  }
-
-  std::string get_input(char ch) {
-    echo();
-    curs_set(1);
-    werase(input_win_);
-    std::string beginning = "> ";
-    beginning.push_back(ch);
-    mvwprintw(input_win_, 1, 2, "%s", beginning.c_str());
-    wmove(input_win_, 1, 5);
-    wrefresh(input_win_);
-    char input[max_length];
-    input[0] = ch;
-    wgetnstr(input_win_, input + 1, sizeof(input) - 1);
-    noecho();
-    curs_set(0);
-    return std::string(input);
-  }
-
-  void handle_scroll(int key) {
-    if (key == KEY_UP && scroll_position_ > 0) {
-      scroll_position_--;
-      redraw_chat();
+  bool process_input() {
+    int ch = get_input_key();
+    switch (ch) {
+      case ERR: {
+        break;
+      }
+      case KEY_RESIZE: {
+        handle_resize();
+        break;
+      }
+      case KEY_ENTER: {
+        break;
+      }
+      case KEY_UP: {
+        handle_scroll(ch);
+        break;
+      }
+      case KEY_DOWN: {
+        handle_scroll(ch);
+        break;
+      }
+      default: {
+        handle_input(ch);
+        return true;
+      }
     }
-    else if (key == KEY_DOWN && scroll_position_ < static_cast<int>(
-        messages_.size()) - getmaxy(chat_win_) + 3) {
-      scroll_position_++;
-      redraw_chat();
-    }
+    return false;
   }
-
-  void entering_message(char ch) { current_input_ = get_input(ch); }
 
   char* get_request() {
     strncpy(last_request_, current_input_.c_str(), max_length - 1);
@@ -93,7 +91,7 @@ class ClientScreen : public AbstractScreen {
     add_message("Server: " + std::string(reply), true);
   }
 
-  ~ClientScreen() override {
+  ~ChatScreen() override {
     delwin(contacts_win_);
     delwin(input_win_);
     delwin(chat_win_);
@@ -156,6 +154,51 @@ class ClientScreen : public AbstractScreen {
     return result;
   }
 
+  int get_input_key() {
+    nodelay(input_win_, true);
+    int ch = wgetch(input_win_);
+    nodelay(input_win_, false);
+    return ch;
+  }
+
+  void handle_input(char ch) {
+    echo();
+    curs_set(1);
+    werase(input_win_);
+    std::string beginning = "> ";
+    beginning.push_back(ch);
+    mvwprintw(input_win_, 1, 2, "%s", beginning.c_str());
+    wmove(input_win_, 1, 5);
+    wrefresh(input_win_);
+    char input[max_length];
+    input[0] = ch;
+    wgetnstr(input_win_, input + 1, sizeof(input) - 1);
+    noecho();
+    curs_set(0);
+    current_input_ = std::string(input);
+  }
+
+  void handle_scroll(int key) {
+    if (key == KEY_UP && scroll_position_ > 0) {
+      scroll_position_--;
+      redraw_chat();
+    }
+    else if (key == KEY_DOWN && scroll_position_ < static_cast<int>(
+        messages_.size()) - getmaxy(chat_win_) + 3) {
+      scroll_position_++;
+      redraw_chat();
+    }
+  }
+
+  void handle_resize() {
+    delwin(contacts_win_);
+    delwin(input_win_);
+    delwin(chat_win_);
+    create_windows();
+    setup_colors();
+    redraw_all();
+  }
+
   void redraw_all() {
     redraw_contacts();
     redraw_chat();
@@ -211,13 +254,6 @@ class ClientScreen : public AbstractScreen {
     wrefresh(chat_win_);
   }
 
-  enum ColorPairs {
-    CONTACTS_PAIR = 1,
-    CHAT_PAIR,
-    REPLY_PAIR,
-    INPUT_PAIR
-  };
-
   WINDOW* contacts_win_;
   WINDOW* input_win_;
   WINDOW* chat_win_;
@@ -227,8 +263,8 @@ class ClientScreen : public AbstractScreen {
   std::string current_input_;
   std::vector<std::pair<std::string, bool>> messages_;
   char last_request_[max_length]{};
-  const size_t max_messages_ = 1000;
-  int scroll_position_ = 0;
+  const size_t max_messages_{1000};
+  int scroll_position_{0};
 };
 
-#endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_CLIENT_SCREEN_HPP_
+#endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_
