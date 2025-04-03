@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         client_win.handle_scroll(ch);
         continue;
       } else if (ch != ERR) {
-        client_win.entering_message(ch);
+        client_win.entering_message(static_cast<char>(ch));
         std::string request = client_win.get_request();
         if (request == "exit") {
           client_win.add_message("Disconnecting...");
