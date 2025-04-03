@@ -13,7 +13,7 @@ file(GLOB_RECURSE SERVER_SOURCES
 )
 
 file(GLOB_RECURSE CLIENT_SOURCES  
-    "src/client/*.cpp"
+    "src/client/main.cpp"
 )
 
 file(GLOB_RECURSE FRONT_SOURCES

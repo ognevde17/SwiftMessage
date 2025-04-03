@@ -14,7 +14,9 @@ enum { max_length = 1024 };
 class ClientScreen : public AbstractScreen {
  public:
   ClientScreen(std::string&& host, std::string&& port)
-      : host_(std::move(host)), port_(std::move(port)) {
+      : AbstractScreen(),
+        host_(std::move(host)),
+        port_(std::move(port)) {
     create_windows();
     post_create();
     setup_colors();
@@ -91,9 +93,15 @@ class ClientScreen : public AbstractScreen {
     add_message("Server: " + std::string(reply), true);
   }
 
+  ~ClientScreen() override {
+    delwin(contacts_win_);
+    delwin(input_win_);
+    delwin(chat_win_);
+  }
+
  protected:
   void create_windows() override {
-    main_win_ = newwin(LINES, COLS, 0, 0);
+    AbstractScreen::create_windows();
     // высота LINES, ширина 25%, далее левый угол
     contacts_win_ = derwin(main_win_, LINES, COLS / 4, 0, 0);
     // высота LINES - 3, ширина 75%, далее левый угол
@@ -112,25 +120,38 @@ class ClientScreen : public AbstractScreen {
 
  private:
   void setup_colors() {
-    init_pair(1, COLOR_WHITE, COLOR_BLUE);
-    init_pair(2, COLOR_BLACK, COLOR_WHITE);
-    init_pair(3, COLOR_GREEN, COLOR_WHITE);
-    init_pair(4, COLOR_BLACK, COLOR_CYAN);
-    wbkgd(contacts_win_, COLOR_PAIR(1));
-    wbkgd(chat_win_, COLOR_PAIR(2));
-    wbkgd(input_win_, COLOR_PAIR(4));
+    if (has_colors()) {
+      init_pair(CONTACTS_PAIR, COLOR_WHITE, COLOR_BLUE);
+      init_pair(CHAT_PAIR, COLOR_BLACK, COLOR_WHITE);
+      init_pair(REPLY_PAIR, COLOR_GREEN, COLOR_WHITE);
+      init_pair(INPUT_PAIR, COLOR_BLACK, COLOR_CYAN);
+    }
+    wbkgd(contacts_win_, COLOR_PAIR(CONTACTS_PAIR));
+    wbkgd(chat_win_, COLOR_PAIR(CHAT_PAIR));
+    wbkgd(input_win_, COLOR_PAIR(INPUT_PAIR));
   }
 
   static std::string wrap_text(const std::string& text, int width) {
     std::string result;
-    size_t pos = 0;
-    while (pos < text.length()) {
-      size_t end = std::min(pos + width, text.length());
-      result += text.substr(pos, end - pos);
-      if (end < text.length()) {
-        result += "\n";
+    size_t line_start = 0;
+    size_t last_space = 0;
+    for (size_t i = 0; i < text.size(); ++i) {
+      if (text[i] == ' ') {
+        last_space = i;
       }
-      pos = end;
+      if (i - line_start >= static_cast<size_t>(width)) {
+        if (last_space > line_start) {
+          result += text.substr(line_start, last_space - line_start) + '\n';
+          line_start = last_space + 1;
+          last_space = line_start;
+        } else {
+          result += text.substr(line_start, width) + '\n';
+          line_start += width;
+        }
+      }
+    }
+    if (line_start < text.size()) {
+      result += text.substr(line_start);
     }
     return result;
   }
@@ -189,6 +210,13 @@ class ClientScreen : public AbstractScreen {
     }
     wrefresh(chat_win_);
   }
+
+  enum ColorPairs {
+    CONTACTS_PAIR = 1,
+    CHAT_PAIR,
+    REPLY_PAIR,
+    INPUT_PAIR
+  };
 
   WINDOW* contacts_win_;
   WINDOW* input_win_;
