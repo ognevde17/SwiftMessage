@@ -16,7 +16,7 @@ int main() {
   DatabaseManager::AddClientIdByLogin("Viktor", 1);
   DatabaseManager::AddClientIdByLogin("Daniil", 2);
 
-  Server server;
+  Server& server = Server::GetInstance();
 
   server.Run();
 

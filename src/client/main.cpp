@@ -1,7 +1,7 @@
 #include "../../include/client/client.hpp"
 
 int main() {
-  std::string server_ip = "127.0.0.1";
+  std::string server_ip = "193.124.117.165";
   std::string server_port = "1234";
 
   std::string login;

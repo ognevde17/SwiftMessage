@@ -1,5 +1,10 @@
 #include "../../include/server/server.hpp"
 
+Server& Server::GetInstance() {
+  static Server instance;
+  return instance;
+}
+
 Server::Server() : io_context_(), connection_manager_() {}
 
 void Server::Run() {

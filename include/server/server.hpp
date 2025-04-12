@@ -19,14 +19,20 @@
 
 class Server {
  public:
-  Server();
+  static Server& GetInstance();
 
   void Run();
 
+
+  Server(const Server&) = delete;
+  Server& operator=(const Server&) = delete;
+
  private:
+  Server();
+  ~Server() = default;
+
   void Session(int user_id);
 
   boost::asio::io_context io_context_;
-
   ConnectionManager connection_manager_;
 };
