@@ -1,0 +1,46 @@
+name: C++ Build Check
+
+on:
+  push:
+    branches: [ main, master, new_server, best-new-server ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Установка зависимостей
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++-10 cmake
+        sudo apt-get install -y libboost-system-dev libboost-thread-dev libboost-serialization-dev
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+    
+    - name: Проверяем, что C++20 поддерживается
+      run: |
+        g++ --version
+        echo '#include <concepts>' > test.cpp
+        echo 'int main() { return 0; }' >> test.cpp
+        g++ -std=c++20 test.cpp -o test && ./test
+        echo "✅ C++20 поддерживается!"
+    
+    - name: Делаем скрипт исполняемым
+      run: chmod +x scripts/run.sh
+    
+    - name: Запуск скрипта, который собирает проект
+      run: ./scripts/run.sh
+    
+    - name: Проверяем, что сборка прошла успешно
+      working-directory: build
+      run: |
+        if [ -f "SwiftMessage_Server" ] && [ -f "SwiftMessage_Client" ]; then
+          echo "✅ Всё чики-пуки!"
+        else
+          echo "❌ Что-то пошло не так("
+          exit 1
+        fi 

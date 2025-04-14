@@ -1,10 +1,20 @@
-
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$PROJECT_ROOT/build"
 CMAKE_COMMAND="cmake .." 
-MAKE_COMMAND="make"  
+MAKE_COMMAND="make"
+
+# Проверка, запущен ли скрипт в GitHub Actions
+if [ -n "$GITHUB_ACTIONS" ]; then
+  echo "Запущено в GitHub Actions, использую CMakeLists.ci.txt..."
+  if [ -f "$PROJECT_ROOT/CMakeLists.ci.txt" ]; then
+    cp "$PROJECT_ROOT/CMakeLists.ci.txt" "$PROJECT_ROOT/CMakeLists.txt"
+    echo "CMakeLists.txt успешно заменен на версию для CI"
+  else
+    echo "Предупреждение: CMakeLists.ci.txt не найден, использую стандартный CMakeLists.txt"
+  fi
+fi
+
 if [ ! -d "$BUILD_DIR" ]; then
   echo "Папка $BUILD_DIR не найдена. Создаю..."
   mkdir -p "$BUILD_DIR"
