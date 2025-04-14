@@ -35,6 +35,7 @@ void Client::SendMessage(const std::string& sender_login,
   if (!connection_.send(data.to_string())) {
     std::cerr << "sended failed\n";
   }
+  std::cout << "Успешно отправлено: " << message << std::endl;
 }
 
 void Client::StartMessage(const std::string& sender_login,
@@ -42,6 +43,7 @@ void Client::StartMessage(const std::string& sender_login,
   std::string message;
   // std::cin >> message;
   std::getline(std::cin, message);
+  std::cout << "message: " << message << std::endl;
   while (message != "endendend") {
     SendMessage(sender_login, rec_login, message);
     // std::cin >> message;
