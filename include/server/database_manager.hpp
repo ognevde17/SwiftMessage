@@ -8,7 +8,11 @@
 class DatabaseManager {
  public:
   static int GetClientIdByLogin(const std::string& login);
+
+  static void AddNewClientByLoginAndPassword(const std::string& login, const std::string& password);
   
+  static bool IsClientLoginExists(const std::string& login);
+
   static bool IsClientCorrectLoginAndPassword(const std::string& login, const std::string& password);
 
   static void AddClientIdByLogin(const std::string& login, int id);

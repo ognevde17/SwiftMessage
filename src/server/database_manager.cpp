@@ -13,6 +13,15 @@ int DatabaseManager::GetClientIdByLogin(const std::string& login) {
   return client_login_to_id_.at(login);
 }
 
+void DatabaseManager::AddNewClientByLoginAndPassword(const std::string& login, const std::string& password) {
+  // TODO: добавить в базу данных
+}
+
+bool DatabaseManager::IsClientLoginExists(const std::string& login) {
+  std::lock_guard<std::mutex> lock(database_manager_mutex_);
+  return client_login_to_id_.find(login) != client_login_to_id_.end();
+}
+
 bool DatabaseManager::IsClientCorrectLoginAndPassword(
     const std::string& login, const std::string& password) {
   std::lock_guard<std::mutex> lock(database_manager_mutex_);

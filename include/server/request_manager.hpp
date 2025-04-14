@@ -6,5 +6,5 @@
 
 class RequestManager {
  public:
-  static void HandleRequest(const std::string& request);
+  static void HandleRequest(const std::string& request, const int client_id);
 };

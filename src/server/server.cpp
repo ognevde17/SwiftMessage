@@ -15,9 +15,9 @@ void Server::Run() {
   }
 }
 
-void Server::Session(int user_id) {
+void Server::Session(const int user_id) {
   while (true) {
     std::string request = connection_manager_.ReceiveData(user_id);
-    RequestManager::HandleRequest(request);
+    RequestManager::HandleRequest(request, user_id);
   }
 }
