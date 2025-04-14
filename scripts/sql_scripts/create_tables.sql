@@ -1,6 +1,6 @@
 -- Создание таблицы пользователей
 CREATE TABLE IF NOT EXISTS "User" (
-    used_id SERIAL PRIMARY KEY,
+    user_id SERIAL PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     email TEXT,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "Chat" (
 
 -- Создание таблицы участников чата
 CREATE TABLE IF NOT EXISTS "ChatParticipant" (
-    user_id INTEGER REFERENCES "User"(used_id),
+    user_id INTEGER REFERENCES "User"(user_id),
     chat_id INTEGER REFERENCES "Chat"(chat_id),
     PRIMARY KEY (user_id, chat_id)
 );
@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS "ChatParticipant" (
 -- Создание таблицы сообщений
 CREATE TABLE IF NOT EXISTS "Message" (
     message_id SERIAL PRIMARY KEY,
-    sender_id INTEGER REFERENCES "User"(used_id),
-    receiver_id INTEGER REFERENCES "User"(used_id),
+    sender_id INTEGER REFERENCES "User"(user_id),
+    receiver_id INTEGER REFERENCES "User"(user_id),
     chat_id INTEGER REFERENCES "Chat"(chat_id),
     content TEXT,
     is_read BOOLEAN DEFAULT FALSE,

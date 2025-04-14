@@ -81,11 +81,11 @@ std::vector<User> DatabaseManager::GetUsers() {
     try {
         pqxx::work txn(*db_connection);
         
-        auto result = txn.exec("SELECT used_id, username, email FROM \"User\"");
+        auto result = txn.exec("SELECT user_id, username, email FROM \"User\"");
         
         for (const auto& row : result) {
             User user;
-            user.id = row["used_id"].as<int>();
+            user.id = row["user_id"].as<int>();
             user.username = row["username"].as<std::string>();
             if (!row["email"].is_null()) {
                 user.email = row["email"].as<std::string>();
@@ -105,7 +105,7 @@ User DatabaseManager::GetUserById(int user_id) {
         pqxx::work txn(*db_connection);
         
         auto result = txn.exec_params(
-            "SELECT used_id, username, email FROM \"User\" WHERE used_id = $1",
+            "SELECT user_id, username, email FROM \"User\" WHERE user_id = $1",
             user_id
         );
 
@@ -114,7 +114,7 @@ User DatabaseManager::GetUserById(int user_id) {
         }
 
         User user;
-        user.id = result[0]["used_id"].as<int>();
+        user.id = result[0]["user_id"].as<int>();
         user.username = result[0]["username"].as<std::string>();
         if (!result[0]["email"].is_null()) {
             user.email = result[0]["email"].as<std::string>();
@@ -241,7 +241,7 @@ int DatabaseManager::GetClientIdByLogin(const std::string& login) {
     try {
         pqxx::work txn(*db_connection);
         auto result = txn.exec_params(
-            "SELECT used_id FROM \"User\" WHERE username = $1",
+            "SELECT user_id FROM \"User\" WHERE username = $1",
             login
         );
         
@@ -250,7 +250,7 @@ int DatabaseManager::GetClientIdByLogin(const std::string& login) {
         }
 
         txn.commit();
-        return result[0]["used_id"].as<int>();
+        return result[0]["user_id"].as<int>();
     } catch (const std::exception& e) {
         throw std::runtime_error("Failed to get user ID: " + std::string(e.what()));
     }
