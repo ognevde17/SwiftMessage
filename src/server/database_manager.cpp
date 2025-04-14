@@ -35,16 +35,6 @@ bool DatabaseManager::CreateUser(const std::string& login, const std::string& pa
     try {
         pqxx::work txn(*db_connection);
         
-        // Проверяем, существует ли пользователь
-        auto check = txn.exec_params(
-            "SELECT COUNT(*) FROM \"User\" WHERE username = $1",
-            login
-        );
-        
-        if (check[0][0].as<int>() > 0) {
-            return false; // Пользователь уже существует
-        }
-
         // Создаем нового пользователя
         txn.exec_params(
             "INSERT INTO \"User\" (username, password) VALUES ($1, $2)",
@@ -67,6 +57,22 @@ bool DatabaseManager::AuthenticateUser(const std::string& login, const std::stri
             "SELECT COUNT(*) FROM \"User\" WHERE username = $1 AND password = $2",
             login,
             password
+        );
+
+        txn.commit();
+        return result[0][0].as<int>() > 0;
+    } catch (const std::exception& e) {
+        return false;
+    }
+}
+
+bool DatabaseManager::IsClientLoginExists(const std::string& login) {
+    try {
+        pqxx::work txn(*db_connection);
+        
+        auto result = txn.exec_params(
+            "SELECT COUNT(*) FROM \"User\" WHERE username = $1",
+            login
         );
 
         txn.commit();

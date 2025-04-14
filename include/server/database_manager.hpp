@@ -17,6 +17,7 @@ public:
     bool IsClientCorrectLoginAndPassword(const std::string& login, const std::string& password);
     bool CreateUser(const std::string& login, const std::string& password);
     bool AuthenticateUser(const std::string& login, const std::string& password);
+    bool IsClientLoginExists(const std::string& login);
     std::vector<User> GetUsers();
     User GetUserById(int user_id);
     int GetClientIdByLogin(const std::string& login);
