@@ -1,5 +1,5 @@
 #include "../../include/server/database_manager.hpp"
-#include "../../include/server/user.hpp"
+#include "../../include/common/user.hpp"
 
 DatabaseManager::DatabaseManager(const std::string& connection_string) {
     try {

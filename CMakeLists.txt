@@ -1,0 +1,59 @@
+cmake_minimum_required(VERSION 3.10)
+project(SwiftMessage)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(SERVER_NAME ${PROJECT_NAME}_Server)
+set(CLIENT_NAME ${PROJECT_NAME}_Client)
+set(DB_TEST_NAME ${PROJECT_NAME}_DbTest)
+
+find_package(Boost REQUIRED COMPONENTS system thread serialization)
+find_package(PostgreSQL REQUIRED)
+find_library(PQXX_LIB pqxx)
+
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(/opt/homebrew/include)
+include_directories(${PostgreSQL_INCLUDE_DIRS})
+
+add_executable(${SERVER_NAME}
+    src/server/main.cpp
+    src/server/database_manager.cpp
+    src/server/connection_manager.cpp
+    src/server/request_manager.cpp
+    src/server/server.cpp
+)
+
+target_link_libraries(${SERVER_NAME}
+    PRIVATE
+    Boost::system
+    Boost::thread
+    Boost::serialization
+    ${PQXX_LIB}
+    ${PostgreSQL_LIBRARIES}
+)
+
+add_executable(${CLIENT_NAME}
+    src/client/main.cpp
+    src/client/connection_manager.cpp
+    src/client/client.cpp
+)
+
+target_link_libraries(${CLIENT_NAME}
+    PRIVATE
+    Boost::system
+    Boost::thread
+    Boost::serialization
+)
+
+# Тесты базы данных
+add_executable(${DB_TEST_NAME}
+    tests/database/test_database_manager.cpp
+    src/server/database_manager.cpp
+)
+
+target_link_libraries(${DB_TEST_NAME}
+    PRIVATE
+    ${PQXX_LIB}
+    ${PostgreSQL_LIBRARIES}
+)

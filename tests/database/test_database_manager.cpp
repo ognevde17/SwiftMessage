@@ -4,9 +4,9 @@
 #include <cassert>
 #include <ctime>
 #include "../../include/server/database_manager.hpp"
-#include "../../include/server/user.hpp"
-#include "../../include/server/chat.hpp"
-#include "../../include/server/message.hpp"
+#include "../../include/common/user.hpp"
+#include "../../include/common/chat.hpp"
+#include "../../include/common/message.hpp"
 
 // Вспомогательная функция для вывода сообщений
 void printTestResult(const std::string& testName, bool success) {

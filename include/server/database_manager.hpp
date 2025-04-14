@@ -4,9 +4,9 @@
 #include <vector>
 #include <memory>
 #include <pqxx/pqxx>
-#include "user.hpp"
-#include "chat.hpp"
-#include "message.hpp"
+#include "../common/user.hpp"
+#include "../common/chat.hpp"
+#include "../common/message.hpp"
 
 class DatabaseManager {
 public:
