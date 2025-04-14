@@ -132,11 +132,7 @@ bool DatabaseManager::CreateChat(int user_id1, int user_id2) {
         pqxx::work txn(*db_connection);
         
         // Создаем новый чат
-        auto result = txn.exec_params(
-            "INSERT INTO \"Chat\" (chat_type) VALUES ('private') RETURNING chat_id",
-            user_id1,
-            user_id2
-        );
+        auto result = txn.exec("INSERT INTO \"Chat\" (chat_type) VALUES ('private') RETURNING chat_id");
         
         int chat_id = result[0][0].as<int>();
 
@@ -190,12 +186,15 @@ bool DatabaseManager::SaveMessage(const Message& message) {
         pqxx::work txn(*db_connection);
         
         txn.exec_params(
-            "INSERT INTO \"Message\" (sender_id, receiver_id, chat_id, content) "
-            "VALUES ($1, $2, $3, $4)",
+            "INSERT INTO \"Message\" (sender_id, receiver_id, chat_id, content, is_read, is_edited, sent_at) "
+            "VALUES ($1, $2, $3, $4, $5, $6, $7)",
             message.sender_id,
             message.receiver_id,
             message.chat_id,
-            message.content
+            message.content,
+            message.is_read,
+            message.is_edited,
+            message.sent_at
         );
 
         txn.commit();
