@@ -75,7 +75,7 @@ std::string ClientConnectionManager::SendRegRequest(const std::string& login, co
     size_t reply_length = socket.read_some(boost::asio::buffer(reply));
     std::string server_reply = std::string(reply.data(), reply_length);
     ServerResponse response = ServerResponse::from_string(server_reply);
-    if (response.response_text == "reg_success") {
+    if (response.response_text == "You have successfully registered") {
       return "registration success";
     } else if (response.response_text == "This login already exists"){
       return "ERROR1";

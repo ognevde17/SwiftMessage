@@ -40,6 +40,7 @@ void RequestManager::HandleAuthRequest(DatabaseManager& database_manager,
 
   if (!database_manager.IsClientCorrectLoginAndPassword(
           auth_request.login, auth_request.password)) {
+    std::cout << "AUTH_REQUEST_ERROR: " << auth_request.login << " " << auth_request.password << std::endl;
     ConnectionManager::SendData(
         connection_id,
         ServerResponse("This login or password is incorrect").to_string());
@@ -77,10 +78,13 @@ void RequestManager::HandleRequest(DatabaseManager& database_manager,
   BaseMessage base_request = BaseMessage::GetRequestType(request);
 
   if (base_request.request_type == "REGISTER_REQUEST") {
+    std::cout << "REGISTER_REQUEST" << std::endl;
     HandleRegisterRequest(database_manager, request, connection_id);
   } else if (base_request.request_type == "AUTH_REQUEST") {
+    std::cout << "AUTH_REQUEST" << std::endl;
     HandleAuthRequest(database_manager, request, connection_id);
   } else if (base_request.request_type == "SEND_MESSAGE") {
+    std::cout << "SEND_MESSAGE" << std::endl;
     HandleSendMessageRequest(database_manager, request, connection_id);
   }
 }

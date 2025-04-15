@@ -134,6 +134,7 @@ bool Client::Register() {
 }
 
 void Client::Run() {
+  Connect();
   while (!is_auth) {
     std::cout << "Auth or Register?" << std::endl;
     std::string ans;
@@ -147,7 +148,6 @@ void Client::Run() {
   std::cout << "vvedite login polychatelya" << std::endl;
   std::string login_to, login;
   std::getline(std::cin, login_to);
-  Connect();
   StartReceive();
   login = user_login;
   StartMessage(login, login_to);
