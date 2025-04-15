@@ -16,7 +16,11 @@ int ConnectionManager::AcceptNewClient() {
 
   int connection_id = GenerateConnectionId();
 
+  std::cout << "OK1" << std::endl;
+
   AssociateConnectionIdWithSocket(connection_id, std::move(socket));
+
+  std::cout << "OK2" << std::endl;
 
   return connection_id;
 }
