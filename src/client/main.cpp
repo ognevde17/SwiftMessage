@@ -6,14 +6,15 @@ int main() {
 
   std::string login;
   std::string login_to;
-
-  std::cout << "vvedite login" << std::endl;
-  std::getline(std::cin, login);
+  
+  Client client(server_ip, server_port);
+  while (!client.Authenticate()) {
+    continue;
+  }
   std::cout << "vvedite login polychatelya" << std::endl;
   std::getline(std::cin, login_to);
-  Client client(server_ip, server_port);
-  std::cout << login << " " << login_to << std::endl;
   client.Connect();
   client.StartReceive();
+  login = client.user_login;
   client.StartMessage(login, login_to);
 }

@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 #include <cstdlib>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <mutex>
 #include <sstream>
 #include <thread>
@@ -20,30 +20,34 @@ class ConnectionManager {
 
   int AcceptNewClient();
 
-  std::string ReceiveData(int client_id);
+  std::string ReceiveData(int connection_id);
 
-  static bool SendData(int client_id, const std::string& data);
+  static bool SendData(int connection_id, const std::string& data);
 
  private:
-  int GenerateClientId();
+  // Методы:
+
+  int GenerateConnectionId();
 
   void CloseConnection(tcp::socket& socket);
 
-  void AddClientSocket(int client_id, tcp::socket socket);
+  void AssociateConnectionIdWithSocket(int connection_id, tcp::socket socket);
+  void AssociateLoginWithConnectionId(const std::string& login, int connection_id);
 
-  static tcp::socket& GetClientSocket(int client_id);
-
-  void RemoveClientSocket(int client_id);
+  void RemoveAssociationBetweenConnectionIdAndSocket(int connection_id);
+  void RemoveAssociationBetweenLoginAndConnectionId(const std::string& login);
 
   std::string ReceiveData(tcp::socket& socket);
 
   static bool SendData(tcp::socket& socket, const std::string& data);
 
+  // Поля:
+
   boost::asio::io_context io;
 
   tcp::acceptor acceptor_;
 
-  std::atomic<int> client_id_counter_{1};
+  std::atomic<int> connection_id_counter_{1};
 
-  static std::map<int, tcp::socket> client_id_to_socket_;
+  static std::unordered_map<int, tcp::socket> connection_id_to_socket_;
 };

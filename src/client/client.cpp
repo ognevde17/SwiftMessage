@@ -78,3 +78,21 @@ void Client::StartReceive() {
   is_running_ = true;
   receiver_thread_ = std::thread(&Client::Receive, this);
 }
+bool Client::Authenticate() {
+  std::cout << "vvedite login" << std::endl;
+  std::string login;
+  std::getline(std::cin, login);
+  std::cout << "vvedite password" << std::endl;
+  std::string password;
+  std::getline(std::cin, password);
+  try {
+    if (connection_.SendAuthRequest(login, password)) {
+      user_login = login;
+      return true;
+    } else {
+      return false;
+    }
+  } catch (...) {
+    return false;
+  }
+}

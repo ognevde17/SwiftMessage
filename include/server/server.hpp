@@ -35,4 +35,6 @@ class Server {
 
   boost::asio::io_context io_context_;
   ConnectionManager connection_manager_;
+  DatabaseManager database_manager_;
+  RequestManager request_manager_;
 };

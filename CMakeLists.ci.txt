@@ -8,8 +8,12 @@ set(SERVER_NAME ${PROJECT_NAME}_Server)
 set(CLIENT_NAME ${PROJECT_NAME}_Client)
 
 find_package(Boost REQUIRED COMPONENTS system thread serialization)
+find_package(PostgreSQL REQUIRED)
+find_library(PQXX_LIB pqxx)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(/opt/homebrew/include)
+include_directories(${PostgreSQL_INCLUDE_DIRS})
 
 add_executable(${SERVER_NAME}
     src/server/main.cpp
@@ -24,6 +28,8 @@ target_link_libraries(${SERVER_NAME}
     Boost::system
     Boost::thread
     Boost::serialization
+    ${PQXX_LIB}
+    ${PostgreSQL_LIBRARIES}
 )
 
 add_executable(${CLIENT_NAME}

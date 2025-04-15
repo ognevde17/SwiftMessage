@@ -5,19 +5,18 @@ Server& Server::GetInstance() {
   return instance;
 }
 
-Server::Server() : io_context_(), connection_manager_() {}
+Server::Server() : io_context_(), connection_manager_(), database_manager_(Constants::DATABASE_CONNECTION_STRING), request_manager_() {}
 
 void Server::Run() {
   while (true) {
-    int user_id = connection_manager_.AcceptNewClient();
-    std::cout << "User " << user_id << " connected" << std::endl;
-    std::thread(&Server::Session, this, user_id).detach();
+    int connection_id = connection_manager_.AcceptNewClient();
+    std::thread(&Server::Session, this, connection_id).detach();
   }
 }
 
-void Server::Session(const int user_id) {
+void Server::Session(const int connection_id) {
   while (true) {
-    std::string request = connection_manager_.ReceiveData(user_id);
-    RequestManager::HandleRequest(request, user_id);
+    std::string request = connection_manager_.ReceiveData(connection_id);
+    request_manager_.HandleRequest(database_manager_, request, connection_id);
   }
 }

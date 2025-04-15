@@ -1,23 +1,37 @@
 #pragma once
 
-#include <mutex>
+#include <memory>
+#include <pqxx/pqxx>
 #include <string>
-#include <map>
-#include "../../include/common/constants.hpp"
+#include <vector>
+
+#include "../common/chat.hpp"
+#include "../common/message.hpp"
+#include "../common/user.hpp"
 
 class DatabaseManager {
  public:
-  static int GetClientIdByLogin(const std::string& login);
+  DatabaseManager(const std::string& connection_string);
+  ~DatabaseManager();
 
-  static void AddNewClientByLoginAndPassword(const std::string& login, const std::string& password);
-  
-  static bool IsClientLoginExists(const std::string& login);
+  // Управление пользователями
+  bool IsClientCorrectLoginAndPassword(const std::string& login,
+                                       const std::string& password);
+  bool CreateUser(const std::string& login, const std::string& password);
+  bool AuthenticateUser(const std::string& login, const std::string& password);
+  bool IsClientLoginExists(const std::string& login);
+  std::vector<User> GetUsers();
+  User GetUserById(int user_id);
+  int GetClientIdByLogin(const std::string& login);
 
-  static bool IsClientCorrectLoginAndPassword(const std::string& login, const std::string& password);
+  // Управление чатами
+  bool CreateChat(int user_id1, int user_id2);
+  std::vector<Chat> GetUserChats(int user_id);
 
-  static void AddClientIdByLogin(const std::string& login, int id);
+  // Управление сообщениями
+  bool SaveMessage(const Message& message);
+  std::vector<Message> GetChatMessages(int chat_id);
 
  private:
-  static std::map<int, std::string> client_id_to_login_;
-  static std::map<std::string, int> client_login_to_id_;
+  std::unique_ptr<pqxx::connection> db_connection;
 };

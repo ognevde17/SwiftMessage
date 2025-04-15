@@ -1,8 +1,8 @@
 #include "../../include/server/connection_manager.hpp"
 
-std::mutex client_id_to_socket_mutex_;
+std::mutex connection_id_to_socket_mutex_;
 
-std::map<int, tcp::socket> ConnectionManager::client_id_to_socket_;
+std::unordered_map<int, tcp::socket> ConnectionManager::connection_id_to_socket_;
 
 ConnectionManager::ConnectionManager()
     : acceptor_(io, tcp::endpoint(boost::asio::ip::make_address("0.0.0.0"),
@@ -11,44 +11,24 @@ ConnectionManager::ConnectionManager()
 int ConnectionManager::AcceptNewClient() {
   tcp::socket socket = acceptor_.accept();
 
-  int client_id = GenerateClientId();
+  int connection_id = GenerateConnectionId();
 
-  std::cout << "OK1" << std::endl;
+  AssociateConnectionIdWithSocket(connection_id, std::move(socket));
 
-  AddClientSocket(client_id, std::move(socket));
-
-  std::cout << "OK2" << std::endl;
-
-  return client_id;
+  return connection_id;
 }
 
-std::string ConnectionManager::ReceiveData(int client_id) {
-  return ReceiveData(GetClientSocket(client_id));
-}
-
-bool ConnectionManager::SendData(int client_id, const std::string& data) {
-  return SendData(GetClientSocket(client_id), data);
-}
-
-int ConnectionManager::GenerateClientId() {
-  return client_id_counter_.fetch_add(1);
+int ConnectionManager::GenerateConnectionId() {
+  return connection_id_counter_.fetch_add(1);
 }
 
 void ConnectionManager::CloseConnection(tcp::socket& socket) { socket.close(); }
 
-void ConnectionManager::AddClientSocket(int client_id, tcp::socket socket) {
-  std::lock_guard<std::mutex> lock(client_id_to_socket_mutex_);
-  ConnectionManager::client_id_to_socket_.emplace(client_id, std::move(socket));
-}
+// Получение данных
 
-tcp::socket& ConnectionManager::GetClientSocket(int client_id) {
-  std::lock_guard<std::mutex> lock(client_id_to_socket_mutex_);
-  return client_id_to_socket_.at(client_id);
-}
-
-void ConnectionManager::RemoveClientSocket(int client_id) {
-  std::lock_guard<std::mutex> lock(client_id_to_socket_mutex_);
-  client_id_to_socket_.erase(client_id);
+std::string ConnectionManager::ReceiveData(int connection_id) {
+  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
+  return ReceiveData(connection_id_to_socket_.at(connection_id));
 }
 
 std::string ConnectionManager::ReceiveData(tcp::socket& socket) {
@@ -65,6 +45,13 @@ std::string ConnectionManager::ReceiveData(tcp::socket& socket) {
   return std::string(data, length);
 }
 
+// Отправка данных
+
+bool ConnectionManager::SendData(int connection_id, const std::string& data) {
+  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
+  return SendData(connection_id_to_socket_.at(connection_id), data);
+}
+
 bool ConnectionManager::SendData(tcp::socket& socket, const std::string& data) {
   boost::system::error_code error;
 
@@ -75,4 +62,19 @@ bool ConnectionManager::SendData(tcp::socket& socket, const std::string& data) {
   }
 
   return true;
+}
+
+// Добавление и удаление ассоциаций
+
+void ConnectionManager::AssociateConnectionIdWithSocket(int connection_id,
+                                                        tcp::socket socket) {
+  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
+  ConnectionManager::connection_id_to_socket_.emplace(connection_id,
+                                                      std::move(socket));
+}
+
+void ConnectionManager::RemoveAssociationBetweenConnectionIdAndSocket(
+    int connection_id) {
+  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
+  connection_id_to_socket_.erase(connection_id);
 }
