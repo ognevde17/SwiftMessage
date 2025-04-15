@@ -80,11 +80,14 @@ void RequestManager::HandleRequest(DatabaseManager& database_manager,
   if (base_request.request_type == "REGISTER_REQUEST") {
     std::cout << "REGISTER_REQUEST" << std::endl;
     HandleRegisterRequest(database_manager, request, connection_id);
+    std::cout << "REGISTER_REQUEST_SUCCESS" << std::endl;
   } else if (base_request.request_type == "AUTH_REQUEST") {
     std::cout << "AUTH_REQUEST" << std::endl;
     HandleAuthRequest(database_manager, request, connection_id);
+    std::cout << "AUTH_REQUEST_SUCCESS" << std::endl;
   } else if (base_request.request_type == "SEND_MESSAGE") {
     std::cout << "SEND_MESSAGE" << std::endl;
     HandleSendMessageRequest(database_manager, request, connection_id);
+    std::cout << "SEND_MESSAGE_SUCCESS" << std::endl;
   }
 }
