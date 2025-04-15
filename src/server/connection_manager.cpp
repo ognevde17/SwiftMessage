@@ -75,6 +75,7 @@ bool ConnectionManager::SendData(tcp::socket& socket, const std::string& data) {
 
 void ConnectionManager::AssociateConnectionIdWithSocket(int connection_id,
                                                         tcp::socket socket) {
+  std::cout << "OK2.5" << std::endl;
   std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
   std::cout << "OK3" << std::endl;
   ConnectionManager::connection_id_to_socket_.emplace(connection_id,
