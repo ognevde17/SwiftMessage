@@ -2,7 +2,8 @@
 
 std::mutex connection_id_to_socket_mutex_;
 
-std::unordered_map<int, tcp::socket> ConnectionManager::connection_id_to_socket_;
+std::unordered_map<int, tcp::socket>
+    ConnectionManager::connection_id_to_socket_;
 
 ConnectionManager::ConnectionManager()
     : acceptor_(io, tcp::endpoint(boost::asio::ip::make_address("0.0.0.0"),
