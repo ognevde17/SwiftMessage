@@ -65,9 +65,9 @@ bool ClientConnectionManager::SendAuthRequest(const std::string& login, const st
     return false;
   }
 }
-const std::string& ClientConnectionManager::SendRegRequest(const std::string& login, const std::string& password) {
+std::string ClientConnectionManager::SendRegRequest(const std::string& login, const std::string& password) {
   try {
-    AuthRequest request;
+    RegisterRequest request;
     request.login = login;
     request.password = password;
     boost::asio::write(socket, boost::asio::buffer(request.to_string()));
@@ -77,12 +77,12 @@ const std::string& ClientConnectionManager::SendRegRequest(const std::string& lo
     ServerResponse response = ServerResponse::from_string(server_reply);
     if (response.response_text == "reg_success") {
       return "registration success";
-    } else if (response.response_text == "error"){
-      return "ERROR: this user already exists";
+    } else if (response.response_text == "This login already exists"){
+      return "ERROR1";
     } else {
-      return "ERROR";
+      return "ERROR2";
     }
   } catch (...) {
-    return "ERROR";
+    return "ERROR2";
   }
 }

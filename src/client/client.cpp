@@ -59,7 +59,7 @@ void Client::Receive() {
       std::string received = connection_.receive(1024);
       SendMessageRequest data = SendMessageRequest::from_string(received);
       if (!data.message_text.empty()) {
-        std::cout << data.message_text << std::endl;
+        std::cout << data.sender_login << ": " << data.message_text << std::endl;
       }
     } catch (const boost::system::system_error& e) {
             if (e.code() == boost::asio::error::eof) {
