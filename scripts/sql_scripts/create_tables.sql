@@ -1,6 +1,6 @@
 -- Создание таблицы пользователей
 CREATE TABLE IF NOT EXISTS "User" (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id SERIAL PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     email TEXT,
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS "User" (
 
 -- Создание таблицы чатов
 CREATE TABLE IF NOT EXISTS "Chat" (
-    chat_id INT AUTO_INCREMENT PRIMARY KEY,
+    chat_id SERIAL PRIMARY KEY,
     chat_name TEXT,
     chat_type TEXT NOT NULL
 );
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS "ChatParticipant" (
 
 -- Создание таблицы сообщений
 CREATE TABLE IF NOT EXISTS "Message" (
-    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id SERIAL PRIMARY KEY,
     sender_id INTEGER REFERENCES "User"(user_id),
     receiver_id INTEGER REFERENCES "User"(user_id),
     chat_id INTEGER REFERENCES "Chat"(chat_id),

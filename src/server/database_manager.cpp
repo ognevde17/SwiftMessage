@@ -10,9 +10,9 @@ DatabaseManager::DatabaseManager(const std::string& connection_string) {
 }
 
 DatabaseManager::~DatabaseManager() {
-    if (db_connection && db_connection->is_open()) {
-        db_connection->close();
-    }
+    // if (db_connection && db_connection->is_open()) {
+    //     db_connection->close();
+    // }
 }
 
 bool DatabaseManager::IsClientCorrectLoginAndPassword(

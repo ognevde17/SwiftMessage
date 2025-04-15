@@ -1,7 +1,16 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$PROJECT_ROOT/build"
-CMAKE_COMMAND="cmake .." 
+
+PG_INCLUDE_DIR=$(pg_config --includedir)
+PG_TYPE_INCLUDE_DIR="${PG_INCLUDE_DIR}/server"
+PG_LIB_DIR=$(pg_config --libdir)
+
+CMAKE_COMMAND="cmake .. \
+	-DPostgreSQL_INCLUDE_DIR=${PG_INCLUDE_DIR} \
+	-DPostgreSQL_TYPE_INCLUDE_DIR=${PG_TYPE_INCLUDE_DIR} \
+	-DPostgreSQL_LIBRARY=${PG_LIB_DIR}/libpq.so"
+
 MAKE_COMMAND="make"
 
 # Проверка, запущен ли скрипт в GitHub Actions

@@ -15,6 +15,7 @@ find_library(PQXX_LIB pqxx)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(/opt/homebrew/include)
 include_directories(${PostgreSQL_INCLUDE_DIRS})
+link_directories(${PostgreSQL_LIBRARY_DIRS})
 
 add_executable(${SERVER_NAME}
     src/server/main.cpp
