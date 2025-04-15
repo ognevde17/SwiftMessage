@@ -12,6 +12,8 @@ ConnectionManager::ConnectionManager()
 int ConnectionManager::AcceptNewClient() {
   tcp::socket socket = acceptor_.accept();
 
+  std::cout << "New client connected" << std::endl;
+
   int connection_id = GenerateConnectionId();
 
   AssociateConnectionIdWithSocket(connection_id, std::move(socket));
