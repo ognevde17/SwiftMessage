@@ -37,7 +37,6 @@ struct ServerResponse : BaseMessage {
   std::string response_text;
 
   ServerResponse() : BaseMessage("SERVER_RESPONSE") {}
-  
   ServerResponse(const std::string& response_text)
       : BaseMessage("SERVER_RESPONSE"), response_text(response_text) {}
 

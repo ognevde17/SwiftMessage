@@ -21,7 +21,10 @@ class Client {
   void Receive();
 
   void StartReceive();
+
   bool Authenticate();
+  bool Register();
+  void Run();
   std::string user_login = "";
 
  private:
@@ -31,8 +34,7 @@ class Client {
   std::string server_port_;
 
   ClientConnectionManager connection_;
-
-  std::atomic<bool> is_running_;
-
+  std::atomic<bool> is_running_ = false;
+  std::atomic<bool> is_auth = false;
   std::thread receiver_thread_;
 };
