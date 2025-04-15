@@ -70,6 +70,9 @@ void RequestManager::HandleSendMessageRequest(DatabaseManager& database_manager,
     return;
   }
 
+  std::cout << "Message: " << send_message_request.message_text << std::endl;
+  std::cout << "Recipient: " << send_message_request.recipient_login << std::endl;
+
   ConnectionManager::SendData(
       database_manager.GetClientIdByLogin(send_message_request.recipient_login),
       send_message_request.to_string());

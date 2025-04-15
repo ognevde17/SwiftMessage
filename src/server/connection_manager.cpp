@@ -55,6 +55,7 @@ std::string ConnectionManager::ReceiveData(tcp::socket& socket) {
 // Отправка данных
 
 bool ConnectionManager::SendData(int connection_id, const std::string& data) {
+  std::cout << "sent to connection_id: " << connection_id << std::endl;
   // std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_); // Commented out
   return SendData(connection_id_to_socket_.at(connection_id), data);
 }
