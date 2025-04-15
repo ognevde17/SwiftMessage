@@ -20,6 +20,6 @@ class RequestManager {
   void HandleSendMessageRequest(DatabaseManager& database_manager, const std::string& request, const int connection_id);
 
   // Поля:
-  std::mutex user_id_to_connection_id_mutex_;
+  // std::mutex user_id_to_connection_id_mutex_; // Commented out
   std::unordered_map<int, int> user_id_to_connection_id_;
 };

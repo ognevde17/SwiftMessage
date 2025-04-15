@@ -1,16 +1,19 @@
 #include "../../include/server/request_manager.hpp"
 
+// RequestManager::RequestManager()
+//     : user_id_to_connection_id_mutex_(), user_id_to_connection_id_() {}
+
 RequestManager::RequestManager()
-    : user_id_to_connection_id_mutex_(), user_id_to_connection_id_() {}
+    : user_id_to_connection_id_() {}
 
 void RequestManager::AssociateUserIdWithConnectionId(const int user_id,
                                                      const int connection_id) {
-  std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
+  // std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_); // Commented out
   user_id_to_connection_id_.emplace(user_id, connection_id);
 }
 
 int RequestManager::GetConnectionIdByUserId(const int user_id) {
-  std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
+  // std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_); // Commented out
   return user_id_to_connection_id_.at(user_id);
 }
 
