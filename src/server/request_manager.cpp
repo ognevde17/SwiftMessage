@@ -9,6 +9,7 @@ RequestManager::RequestManager()
 void RequestManager::AssociateUserIdWithConnectionId(const int user_id,
                                                      const int connection_id) {
   // std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_); // Commented out
+  std::cout << "Associating user_id: " << user_id << " with connection_id: " << connection_id << std::endl;
   user_id_to_connection_id_.emplace(user_id, connection_id);
 }
 
@@ -72,6 +73,8 @@ void RequestManager::HandleSendMessageRequest(DatabaseManager& database_manager,
 
   std::cout << "Message: " << send_message_request.message_text << std::endl;
   std::cout << "Recipient: " << send_message_request.recipient_login << std::endl;
+
+  std::cout << "GetClientIdByLogin: " << database_manager.GetClientIdByLogin(send_message_request.recipient_login) << std::endl;
 
   ConnectionManager::SendData(
       database_manager.GetClientIdByLogin(send_message_request.recipient_login),
