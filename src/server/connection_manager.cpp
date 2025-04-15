@@ -85,6 +85,7 @@ void ConnectionManager::AssociateConnectionIdWithSocket(int connection_id,
 
 void ConnectionManager::RemoveAssociationBetweenConnectionIdAndSocket(
     int connection_id) {
+  std::cout << "NOOOO" << std::endl;
   std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
   connection_id_to_socket_.erase(connection_id);
 }
