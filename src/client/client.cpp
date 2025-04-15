@@ -116,7 +116,7 @@ bool Client::Register() {
   std::getline(std::cin, password);
   try {
     std::string answer = connection_.SendRegRequest(login, password);
-    if (answer == "reg_success") {
+    if (answer == "You have successfully registered") {
       user_login = login;
       std::cout << "REGISTRATION SUCCESS" << std::endl;
       return true;

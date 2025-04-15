@@ -25,5 +25,6 @@ void Server::Session(const int connection_id) {
   while (true) {
     std::string request = connection_manager_.ReceiveData(connection_id);
     request_manager_.HandleRequest(database_manager_, request, connection_id);
+    std::cout << "handle request ended" << std::endl;
   }
 }

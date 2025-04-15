@@ -76,7 +76,7 @@ std::string ClientConnectionManager::SendRegRequest(const std::string& login, co
     std::string server_reply = std::string(reply.data(), reply_length);
     ServerResponse response = ServerResponse::from_string(server_reply);
     if (response.response_text == "You have successfully registered") {
-      return "registration success";
+      return "You have successfully registered";
     } else if (response.response_text == "This login already exists"){
       return "ERROR1";
     } else {
