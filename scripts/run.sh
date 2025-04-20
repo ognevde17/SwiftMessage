@@ -2,17 +2,37 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$PROJECT_ROOT/build"
 
+CMAKE_COMMAND="cmake .."
+MAKE_COMMAND="make"
+
+# Если запускаемся в Ubuntu — настраиваем флаги для PostgreSQL
+if [[ -f /etc/os-release ]]; then
+  # Подключаем переменные из os-release
+  . /etc/os-release
+  if [[ "$ID" == "ubuntu" ]]; then
+    echo "Detected Ubuntu—включаем PostgreSQL настройки..."
+    
+    PG_INCLUDE_DIR="$(pg_config --includedir)"
+    PG_TYPE_INCLUDE_DIR="${PG_INCLUDE_DIR}/server"
+    PG_LIB_DIR="$(pg_config --libdir)"
+
+    CMAKE_COMMAND="cmake .. \
+      -DPostgreSQL_INCLUDE_DIR=${PG_INCLUDE_DIR} \
+      -DPostgreSQL_TYPE_INCLUDE_DIR=${PG_TYPE_INCLUDE_DIR} \
+      -DPostgreSQL_LIBRARY=${PG_LIB_DIR}/libpq.so"
+  fi
+fi
+
 # PG_INCLUDE_DIR=$(pg_config --includedir)
 # PG_TYPE_INCLUDE_DIR="${PG_INCLUDE_DIR}/server"
 # PG_LIB_DIR=$(pg_config --libdir)
 
-CMAKE_COMMAND="cmake .."
+
 # CMAKE_COMMAND="cmake .. \
 # 	-DPostgreSQL_INCLUDE_DIR=${PG_INCLUDE_DIR} \
 # 	-DPostgreSQL_TYPE_INCLUDE_DIR=${PG_TYPE_INCLUDE_DIR} \
 # 	-DPostgreSQL_LIBRARY=${PG_LIB_DIR}/libpq.so"
 
-MAKE_COMMAND="make"
 
 # Проверка, запущен ли скрипт в GitHub Actions
 if [ -n "$GITHUB_ACTIONS" ]; then
