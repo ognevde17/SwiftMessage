@@ -40,12 +40,13 @@ jobs:
     - name: Запуск скрипта, который собирает сервер
       run: ./scripts/create_server.sh
     
+      
     - name: Проверяем, что сборка прошла успешно
-      working-directory: build
       run: |
-        if [ -f "SwiftMessage_Server" ] && [ -f "SwiftMessage_Client" ]; then
+        if [[ -x build-client/SwiftMessage_Client && -x build-server/SwiftMessage_Server ]]; then
           echo "✅ Всё чики-пуки!"
         else
           echo "❌ Что-то пошло не так("
           exit 1
-        fi 
+        fi
+    
