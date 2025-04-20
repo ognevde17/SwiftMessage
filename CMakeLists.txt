@@ -8,53 +8,64 @@ set(SERVER_NAME ${PROJECT_NAME}_Server)
 set(CLIENT_NAME ${PROJECT_NAME}_Client)
 set(DB_TEST_NAME ${PROJECT_NAME}_DbTest)
 
+# Дефолтные значения тех, кого мы будем собирать
+option(BUILD_CLIENT "Build SwiftMessage client"    ON)
+option(BUILD_SERVER "Build SwiftMessage server"    ON)
+option(BUILD_DB_TEST "Build database tests"        OFF)
+
 find_package(Boost REQUIRED COMPONENTS system thread serialization)
-find_package(PostgreSQL REQUIRED)
-find_library(PQXX_LIB pqxx)
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(/opt/homebrew/include)
-include_directories(${PostgreSQL_INCLUDE_DIRS})
-link_directories(${PostgreSQL_LIBRARY_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
-add_executable(${SERVER_NAME}
-    src/server/main.cpp
-    src/server/database_manager.cpp
-    src/server/connection_manager.cpp
-    src/server/request_manager.cpp
-    src/server/server.cpp
-)
+if (BUILD_SERVER OR BUILD_DB_TEST)
+  find_package(PostgreSQL REQUIRED)
+  find_library(PQXX_LIB pqxx)
+endif()
 
-target_link_libraries(${SERVER_NAME}
-    PRIVATE
-    Boost::system
-    Boost::thread
-    Boost::serialization
-    ${PQXX_LIB}
-    ${PostgreSQL_LIBRARIES}
-)
+if (BUILD_SERVER)
+    add_executable(${SERVER_NAME}
+        src/server/main.cpp
+        src/server/database_manager.cpp
+        src/server/connection_manager.cpp
+        src/server/request_manager.cpp
+        src/server/server.cpp
+    )
 
-add_executable(${CLIENT_NAME}
-    src/client/main.cpp
-    src/client/connection_manager.cpp
-    src/client/client.cpp
-)
+    target_link_libraries(${SERVER_NAME}
+        PRIVATE
+        Boost::system
+        Boost::thread
+        Boost::serialization
+        ${PQXX_LIB}
+        ${PostgreSQL_LIBRARIES}
+    )
+endif()
 
-target_link_libraries(${CLIENT_NAME}
-    PRIVATE
-    Boost::system
-    Boost::thread
-    Boost::serialization
-)
+if (BUILD_CLIENT)
+    add_executable(${CLIENT_NAME}
+        src/client/main.cpp
+        src/client/connection_manager.cpp
+        src/client/client.cpp
+    )
 
-# Тесты базы данных
-add_executable(${DB_TEST_NAME}
-    tests/database/test_database_manager.cpp
-    src/server/database_manager.cpp
-)
+    target_link_libraries(${CLIENT_NAME}
+        PRIVATE
+        Boost::system
+        Boost::thread
+        Boost::serialization
+    )
+endif()
 
-target_link_libraries(${DB_TEST_NAME}
-    PRIVATE
-    ${PQXX_LIB}
-    ${PostgreSQL_LIBRARIES}
-)
+
+if (BUILD_DB_TEST)
+    add_executable(${DB_TEST_NAME}
+        tests/database/test_database_manager.cpp
+        src/server/database_manager.cpp
+    )
+
+    target_link_libraries(${DB_TEST_NAME}
+        PRIVATE
+        ${PQXX_LIB}
+        ${PostgreSQL_LIBRARIES}
+    )
+endif()

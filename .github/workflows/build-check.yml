@@ -30,10 +30,15 @@ jobs:
         echo "✅ C++20 поддерживается!"
     
     - name: Делаем скрипт исполняемым
-      run: chmod +x scripts/run.sh
+      run: |
+        chmod +x scripts/create_client.sh
+        chmod +x scripts/create_server.sh
     
-    - name: Запуск скрипта, который собирает проект
-      run: ./scripts/run.sh
+    - name: Запуск скрипта, который собирает клиента
+      run: ./scripts/create_client.sh
+    
+    - name: Запуск скрипта, который собирает сервер
+      run: ./scripts/create_server.sh
     
     - name: Проверяем, что сборка прошла успешно
       working-directory: build
