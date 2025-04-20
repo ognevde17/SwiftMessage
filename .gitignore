@@ -1,6 +1,9 @@
 .vscode/*
 
 build/*
-!build/
+
+build-client/*
+
+build-server/*
 
 .DS_Store
