@@ -1,6 +1,6 @@
 #include "../../include/server/connection_manager.hpp"
 
-// std::mutex connection_id_to_socket_mutex_; // Commented out
+std::mutex ConnectionManager::connection_id_to_socket_mutex_;
 
 std::unordered_map<int, tcp::socket>
     ConnectionManager::connection_id_to_socket_;
@@ -34,7 +34,7 @@ void ConnectionManager::CloseConnection(tcp::socket& socket) { socket.close(); }
 // Получение данных
 
 std::string ConnectionManager::ReceiveData(int connection_id) {
-  // std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_); // Commented out
+  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
   return ReceiveData(connection_id_to_socket_.at(connection_id));
 }
 
@@ -56,7 +56,7 @@ std::string ConnectionManager::ReceiveData(tcp::socket& socket) {
 
 bool ConnectionManager::SendData(int connection_id, const std::string& data) {
   std::cout << "sent to connection_id: " << connection_id << std::endl;
-  // std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_); // Commented out
+  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
   return SendData(connection_id_to_socket_.at(connection_id), data);
 }
 
@@ -77,7 +77,7 @@ bool ConnectionManager::SendData(tcp::socket& socket, const std::string& data) {
 void ConnectionManager::AssociateConnectionIdWithSocket(int connection_id,
                                                         tcp::socket socket) {
   std::cout << "OK2.5" << std::endl;
-  // std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
+  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
   std::cout << "OK3" << std::endl;
   ConnectionManager::connection_id_to_socket_.emplace(connection_id,
                                                       std::move(socket));
@@ -87,6 +87,6 @@ void ConnectionManager::AssociateConnectionIdWithSocket(int connection_id,
 void ConnectionManager::RemoveAssociationBetweenConnectionIdAndSocket(
     int connection_id) {
   std::cout << "NOOOO" << std::endl;
-  // std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
+  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
   connection_id_to_socket_.erase(connection_id);
 }

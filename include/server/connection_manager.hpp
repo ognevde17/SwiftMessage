@@ -50,4 +50,5 @@ class ConnectionManager {
   std::atomic<int> connection_id_counter_{1};
 
   static std::unordered_map<int, tcp::socket> connection_id_to_socket_;
+  static std::mutex connection_id_to_socket_mutex_;
 };
