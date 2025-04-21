@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+#include <unordered_map>
 #include "../common/messages.hpp"
 #include "database_manager.hpp"
 #include "connection_manager.hpp"
@@ -20,6 +22,6 @@ class RequestManager {
   void HandleSendMessageRequest(DatabaseManager& database_manager, const std::string& request, const int connection_id);
 
   // Поля:
-  // std::mutex user_id_to_connection_id_mutex_; // Commented out
+  std::mutex user_id_to_connection_id_mutex_;
   std::unordered_map<int, int> user_id_to_connection_id_;
 };
