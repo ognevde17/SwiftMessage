@@ -6,13 +6,18 @@ BUILD_DIR="$PROJECT_ROOT/build-client"
 
 mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR"
 
-cmake .. \
-  -DBUILD_CLIENT=ON \
-  -DBUILD_SERVER=OFF \
-  -DBUILD_DB_TEST=OFF \
-  $([[ -f /etc/os-release ]] && . /etc/os-release && [[ "$ID" == "ubuntu" ]] \
-    && printf "-DPostgreSQL_INCLUDE_DIR=%s -DPostgreSQL_TYPE_INCLUDE_DIR=%s/server -DPostgreSQL_LIBRARY=%s/libpq.so" \
-         "$(pg_config --includedir)" "$(pg_config --includedir)" "$(pg_config --libdir)") \
-&& cmake --build . --target SwiftMessage_Client
+CMAKE_ARGS=(".." \
+  "-DBUILD_CLIENT=ON" \
+  "-DBUILD_SERVER=OFF" \
+  "-DBUILD_DB_TEST=OFF")
 
-echo "✅ Клиент готов: $BUILD_DIR/SwiftMessage_Client"
+echo "Running CMake with arguments: ${CMAKE_ARGS[@]}"
+cmake "${CMAKE_ARGS[@]}" && \
+  cmake --build . --target SwiftMessage_Client
+
+if [ $? -eq 0 ]; then
+  echo "✅ Клиент готов: $BUILD_DIR/SwiftMessage_Client"
+else
+  echo "❌ Ошибка сборки клиента."
+  exit 1
+fi

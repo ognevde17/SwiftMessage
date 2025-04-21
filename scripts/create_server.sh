@@ -14,7 +14,7 @@ CMAKE_ARGS=(".." \
 if [[ -f /etc/os-release ]] && grep -q 'ID=ubuntu' /etc/os-release; then
   echo "Ubuntu detected. Adding PostgreSQL paths to CMake arguments."
   PG_INCLUDE_DIR=$(pg_config --includedir)
-  PG_TYPE_INCLUDE_DIR=$(pg_config --includedir-server) # Use correct config option
+  PG_TYPE_INCLUDE_DIR=$(pg_config --includedir-server)
   PG_LIB_DIR=$(pg_config --libdir)
   CMAKE_ARGS+=("-DPostgreSQL_INCLUDE_DIR=${PG_INCLUDE_DIR}")
   CMAKE_ARGS+=("-DPostgreSQL_TYPE_INCLUDE_DIR=${PG_TYPE_INCLUDE_DIR}")
