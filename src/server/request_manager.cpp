@@ -9,13 +9,13 @@ RequestManager::RequestManager()
 
 void RequestManager::AssociateUserIdWithConnectionId(const int user_id,
                                                      const int connection_id) {
-  std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
+  // std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
   std::cout << "Associating user_id: " << user_id << " with connection_id: " << connection_id << std::endl;
   user_id_to_connection_id_.emplace(user_id, connection_id);
 }
 
 int RequestManager::GetConnectionIdByUserId(const int user_id) {
-  std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
+  // std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
   return user_id_to_connection_id_.at(user_id);
 }
 
@@ -79,7 +79,7 @@ void RequestManager::HandleSendMessageRequest(DatabaseManager& database_manager,
 
   int recipient_connection_id;
   {
-    std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
+    // std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
     recipient_connection_id = user_id_to_connection_id_.at(database_manager.GetClientIdByLogin(send_message_request.recipient_login));
   }
   ConnectionManager::SendData(

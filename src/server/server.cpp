@@ -14,6 +14,7 @@ Server::Server()
 void Server::Run() {
   std::cout << "Server is running" << std::endl;
   while (true) {
+    std::cout << "Waiting for new client..." << std::endl;
     int connection_id = connection_manager_.AcceptNewClient();
     std::cout << "New client connected with connection id: " << connection_id
               << std::endl;
