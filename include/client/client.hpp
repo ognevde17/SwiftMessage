@@ -3,7 +3,7 @@
 #include <thread>
 
 #include "connection_manager.hpp"
-
+#include "interface.hpp"
 class Client {
  public:
   Client(const std::string& server_ip, const std::string& server_port);
@@ -16,7 +16,7 @@ class Client {
 
   void SendMessage(const std::string& sender_login, const std::string& rec_login, const std::string& message);
 
-  void StartMessage(const std::string& sender_login, const std::string& rec_login);
+  void StartMessageLoop(const std::string& sender_login, const std::string& rec_login);
 
   void Receive();
 
@@ -25,7 +25,7 @@ class Client {
   bool Authenticate();
   bool Register();
   void Run();
-  std::string user_login = "";
+  std::string user_login_ = "";
 
  private:
   std::string username_;
@@ -35,6 +35,7 @@ class Client {
 
   ClientConnectionManager connection_;
   std::atomic<bool> is_running_ = false;
-  std::atomic<bool> is_auth = false;
+  std::atomic<bool> is_auth_ = false;
   std::thread receiver_thread_;
+  Interface interface_;
 };
