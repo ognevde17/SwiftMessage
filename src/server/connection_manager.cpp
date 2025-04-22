@@ -12,15 +12,9 @@ ConnectionManager::ConnectionManager()
 int ConnectionManager::AcceptNewClient() {
   tcp::socket socket = acceptor_.accept();
 
-  std::cout << "New client connected" << std::endl;
-
   int connection_id = GenerateConnectionId();
 
-  std::cout << "OK1" << std::endl;
-
   AssociateConnectionIdWithSocket(connection_id, std::move(socket));
-
-  std::cout << "OK2" << std::endl;
 
   return connection_id;
 }
@@ -35,8 +29,11 @@ void ConnectionManager::CloseConnection(tcp::socket& socket) { socket.close(); }
 
 std::string ConnectionManager::ReceiveData(int connection_id) {
   std::unique_lock<std::mutex> lk(connection_id_to_socket_mutex_);
+
   auto& sock = connection_id_to_socket_.at(connection_id);
+
   lk.unlock();
+
   return ReceiveData(sock);
 }
 
@@ -57,9 +54,13 @@ std::string ConnectionManager::ReceiveData(tcp::socket& socket) {
 // Отправка данных
 
 bool ConnectionManager::SendData(int connection_id, const std::string& data) {
-  std::cout << "sent to connection_id: " << connection_id << std::endl;
-  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
-  return SendData(connection_id_to_socket_.at(connection_id), data);
+  std::unique_lock<std::mutex> lk(connection_id_to_socket_mutex_);
+
+  auto& sock = connection_id_to_socket_.at(connection_id);
+
+  lk.unlock();
+
+  return SendData(sock, data);
 }
 
 bool ConnectionManager::SendData(tcp::socket& socket, const std::string& data) {
@@ -78,17 +79,13 @@ bool ConnectionManager::SendData(tcp::socket& socket, const std::string& data) {
 
 void ConnectionManager::AssociateConnectionIdWithSocket(int connection_id,
                                                         tcp::socket socket) {
-  std::cout << "OK2.5" << std::endl;
   std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
-  std::cout << "OK3" << std::endl;
   ConnectionManager::connection_id_to_socket_.emplace(connection_id,
                                                       std::move(socket));
-  std::cout << "OK4" << std::endl;
 }
 
 void ConnectionManager::RemoveAssociationBetweenConnectionIdAndSocket(
     int connection_id) {
-  std::cout << "NOOOO" << std::endl;
   std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
   connection_id_to_socket_.erase(connection_id);
 }
