@@ -34,8 +34,10 @@ void ConnectionManager::CloseConnection(tcp::socket& socket) { socket.close(); }
 // Получение данных
 
 std::string ConnectionManager::ReceiveData(int connection_id) {
-  std::lock_guard<std::mutex> lock(connection_id_to_socket_mutex_);
-  return ReceiveData(connection_id_to_socket_.at(connection_id));
+  std::unique_lock<std::mutex> lk(connection_id_to_socket_mutex_);
+  auto& sock = connection_id_to_socket_.at(connection_id);
+  lk.unlock();
+  return ReceiveData(sock);
 }
 
 std::string ConnectionManager::ReceiveData(tcp::socket& socket) {
