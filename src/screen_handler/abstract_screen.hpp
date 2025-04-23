@@ -15,8 +15,8 @@ enum ColorPairs {
   CHAT_PAIR,
   REPLY_PAIR,
   INPUT_PAIR,
-  BUTTON_PAIR,
-  GREETING_SCREEN_PAIR
+  DEFAULT_PAIR,
+  ACTIVE_PAIR
 };
 
 class AbstractScreen {

@@ -13,7 +13,8 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include "../screen_handler/greeting_screen.hpp"
-#include "../screen_handler/old_chat_screen.hpp"
+#include "../screen_handler/sign_screen.hpp"
+#include "../screen_handler/chat_screen.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -34,16 +35,35 @@ int main(int argc, char* argv[]) {
       is_pressed = greeting_screen.handle_input();
     }
 
+    SignScreen sign_screen;
+    is_pressed = false;
+    while(!is_pressed) {
+      auto state = sign_screen.handle_input();
+      switch(state) {
+        case SignScreen::Result::Login:
+        case SignScreen::Result::Register:
+          is_pressed = true;
+          break;
+        case SignScreen::Result::Exit:
+          is_pressed = true;
+          break;
+        case SignScreen::Result::None:
+          break;
+      }
+      sign_screen.refresh();
+    }
+
     ChatScreen client_win(argv[1], argv[2]);
     client_win.update_status("Connecting...");
     boost::asio::connect(s, resolver.resolve(argv[1], argv[2]));
     client_win.update_status("Connected");
-    client_win.add_message("Type 'exit' to quit");
+    client_win.add_message("Logged as: " + sign_screen.get_login(), true);
+    client_win.add_message("Type 'exit' to quit", true);
     while (true) {
-      if (client_win.process_input()) {
+      if (client_win.handle_input()) {
         std::string request = client_win.get_request();
         if (request == "exit") {
-          client_win.add_message("Disconnecting...");
+          client_win.add_message("Disconnecting...", true);
           break;
         }
         client_win.add_message(request);
