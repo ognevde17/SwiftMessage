@@ -1,0 +1,243 @@
+//
+// Created by sheyme on 24/04/25.
+//
+
+#include "../../include/screen_handler/chat_screen.hpp"
+
+ChatScreen::ChatScreen() : AbstractScreen() {
+  create_windows();
+  post_create();
+  init_colors();
+  refresh();
+}
+
+void ChatScreen::create_windows() {
+  AbstractScreen::create_windows();
+  int contacts_width = COLS / 4;
+  contacts_win_ = derwin(main_win_, LINES, contacts_width, 0, 0);
+  chat_win_ = derwin(main_win_, LINES - 3, COLS - contacts_width,
+                     0, contacts_width);
+  input_win_ = derwin(main_win_, 3, COLS - contacts_width,
+                      LINES - 3, contacts_width);
+  keypad(input_win_, true);
+  scrollok(chat_win_, true);
+  wtimeout(input_win_, 100);
+}
+
+void ChatScreen::post_create() {
+  box(main_win_, 0, 0);
+  wrefresh(main_win_);
+}
+
+void ChatScreen::init_colors() {
+  if (has_colors()) {
+    init_pair(DEFAULT_PAIR, COLOR_WHITE, COLOR_BLACK);
+    init_pair(ACTIVE_PAIR, COLOR_CYAN, COLOR_BLACK);
+  }
+  wbkgd(contacts_win_, COLOR_PAIR(DEFAULT_PAIR));
+  wbkgd(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
+  wbkgd(input_win_, COLOR_PAIR(DEFAULT_PAIR));
+}
+
+void ChatScreen::refresh() {
+  werase(main_win_);
+  draw_layout();
+}
+
+void ChatScreen::update_messages(const std::vector<Message>& messages) {
+  messages_ = messages;
+}
+
+std::string ChatScreen::get_current_input() {
+  auto input_copy = current_input_;
+  current_input_.clear();
+  return input_copy;
+}
+
+ChatScreen::Result ChatScreen::handle_input() {
+  int ch = wgetch(input_win_);
+  switch (ch) {
+    case KEY_RESIZE:
+      handle_resize();
+      return Result::None;
+    case KEY_UP:
+      handle_scroll(-1);
+      return Result::Scroll;
+    case KEY_DOWN:
+      handle_scroll(1);
+      return Result::Scroll;
+    case 9:
+      handle_scroll(1);
+      return Result::Scroll;
+    case 27:
+      return Result::Exit;
+    case '\n':
+    case KEY_ENTER:
+      refresh();
+      return Result::NewMessage;
+    default:
+      handle_char(ch);
+      return Result::None;
+  }
+}
+
+std::string ChatScreen::wrap_text(const std::string& text, int width) {
+  std::string result;
+  size_t line_start = 0;
+  size_t last_space = 0;
+  for (size_t i = 0; i < text.size(); ++i) {
+    if (text[i] == ' ') {
+      last_space = i;
+    }
+    if (i - line_start >= static_cast<size_t>(width)) {
+      if (last_space > line_start) {
+        result += text.substr(line_start, last_space - line_start) + '\n';
+        line_start = last_space + 1;
+        last_space = line_start;
+      } else {
+        result += text.substr(line_start, width) + '\n';
+        line_start += width;
+      }
+    }
+  }
+  if (line_start < text.size()) {
+    result += text.substr(line_start);
+  }
+  return result;
+}
+
+void ChatScreen::add_message(const std::string& message, bool is_reply) {
+  messages_.push_back({wrap_text(message, getmaxx(chat_win_) - 4), is_reply});
+  if (messages_.size() > static_cast<size_t>(kMaxMessages)) {
+    messages_.erase(messages_.begin());
+  }
+  scroll_position_ =
+      std::max(0, static_cast<int>(messages_.size()) - getmaxy(chat_win_) + 2);
+  draw_chat();
+}
+
+void ChatScreen::clear_chat() {
+  messages_.clear();
+  scroll_position_ = 0;
+  draw_chat();
+}
+
+void ChatScreen::handle_char(int ch) {
+  if (ch == KEY_BACKSPACE || ch == 127) {
+    if (!current_input_.empty()) {
+      current_input_.pop_back();
+    }
+  } else if (isprint(ch)) {
+    current_input_ += static_cast<char>(ch);
+  }
+  draw_input_field();
+}
+
+void ChatScreen::handle_resize() {
+  delwin(contacts_win_);
+  delwin(input_win_);
+  delwin(chat_win_);
+  create_windows();
+  init_colors();
+  refresh();
+}
+
+void ChatScreen::handle_scroll(int direction) {
+  int visible_line = getmaxy(chat_win_) - 2;
+  int total_messages = static_cast<int>(messages_.size());
+  int max_scroll = std::max(0, total_messages - visible_line);
+  int new_position = scroll_position_ + direction;
+  if (new_position < 0) {
+    new_position = 0;
+  } else if (new_position > max_scroll) {
+    new_position = max_scroll;
+  }
+  scroll_position_ = new_position;
+  draw_chat();
+}
+
+void ChatScreen::update_status(const std::string& status) {
+  status_ = wrap_text(status, getmaxx(contacts_win_) - 4);
+}
+
+void ChatScreen::draw_contacts() {
+  werase(contacts_win_);
+  box(contacts_win_, 0, 0);
+  std::string title = host_ + ':' + port_;
+  mvwprintw(contacts_win_, 0, (getmaxx(contacts_win_) - title.length()) / 2,
+            "%s", title.c_str());
+  int line = 2;
+  size_t start = 0;
+  while (start < status_.length() && line < static_cast<size_t>
+                                         (getmaxy(contacts_win_) - 1)) {
+    size_t end = status_.find('\n', start);
+    if (end == std::string::npos) {
+      end = status_.length();
+    }
+    mvwprintw(contacts_win_, line++, 2, "%.*s",
+              static_cast<int>(end - start), status_.c_str() + start);
+    start = end + 1;
+  }
+  wrefresh(contacts_win_);
+}
+
+void ChatScreen::draw_chat() {
+  werase(chat_win_);
+  box(chat_win_, 0, 0);
+  const int kVisibleLine = getmaxy(chat_win_) - 2;
+  int start_idx =
+      std::max(0, static_cast<int>
+               (messages_.size() - kVisibleLine - scroll_position_));
+  for (int idx = 0; idx < kVisibleLine; ++idx) {
+    int message_idx = start_idx + idx;
+    if (message_idx >= static_cast<int>(messages_.size())) {
+      break;
+    }
+    const auto& message = messages_[message_idx];
+    wattron(chat_win_, COLOR_PAIR(message.is_reply ?
+                                                   ACTIVE_PAIR : DEFAULT_PAIR));
+    int line = idx + 1;
+    size_t pos = 0;
+    while (pos < message.text.length() && line < kVisibleLine) {
+      size_t end = message.text.find('\n', pos);
+      if (end == std::string::npos) {
+        end = message.text.length();
+      }
+      mvwprintw(chat_win_, line++, 2, "%.*s", static_cast<int>(end - pos),
+                message.text.c_str() + pos);
+      pos = end + 1;
+    }
+    wattroff(chat_win_, COLOR_PAIR(message.is_reply ?
+                                                    ACTIVE_PAIR : DEFAULT_PAIR));
+  }
+  if (scroll_position_ > 0 ||
+      start_idx + kVisibleLine < static_cast<int>(messages_.size())) {
+    std::string scroll_title = "^ " + std::to_string(scroll_position_ + 1)
+                               + "/" + std::to_string(messages_.size())
+                               + " v";
+    mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_title.length() - 1,
+              "%s", scroll_title.c_str());
+  }
+  wrefresh(chat_win_);
+}
+
+void ChatScreen::draw_input_field() {
+  werase(input_win_);
+  box(input_win_, 0, 0);
+  mvwprintw(input_win_, 1, 2, "> %s", current_input_.c_str());
+  wmove(input_win_, 1, 2 + current_input_.length() + 1);
+  wrefresh(input_win_);
+}
+
+void ChatScreen::draw_layout() {
+  draw_contacts();
+  draw_chat();
+  draw_input_field();
+  wrefresh(main_win_);
+}
+
+ChatScreen::~ChatScreen() {
+  delwin(contacts_win_);
+  delwin(chat_win_);
+  delwin(input_win_);
+}
