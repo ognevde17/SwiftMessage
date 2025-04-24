@@ -146,20 +146,6 @@ class ChatScreen : public AbstractScreen {
   }
 
   void handle_char(int ch) {
-//    echo();
-//    curs_set(1);
-//    werase(input_win_);
-//    std::string beginning = "> ";
-//    beginning.push_back(ch);
-//    mvwprintw(input_win_, 1, 2, "%s", beginning.c_str());
-//    wmove(input_win_, 1, 5);
-//    wrefresh(input_win_);
-//    char input[max_length];
-//    input[0] = ch;
-//    wgetnstr(input_win_, input + 1, sizeof(input) - 1);
-//    noecho();
-//    curs_set(0);
-//    current_input_ = std::string(input);
     echo();
     curs_set(1);
     werase(input_win_);
@@ -175,6 +161,7 @@ class ChatScreen : public AbstractScreen {
     mvwprintw(input_win_, 1, 2, "%s", input_line.c_str());
     wmove(input_win_, 1, 4 + static_cast<int>(current_input_.length()));
     wrefresh(input_win_);
+    curs_set(0);
     noecho();
   }
 

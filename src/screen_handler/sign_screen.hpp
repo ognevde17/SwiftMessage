@@ -147,7 +147,6 @@ class SignScreen : public AbstractScreen {
 
   void draw_borders() {
     box(main_win_, 0, 0);
-    box(content_win_, 0, 0);
   }
 
   void draw_field(const std::string& label, const std::string& value,

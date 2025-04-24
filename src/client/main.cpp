@@ -8,12 +8,9 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
 #include <boost/asio.hpp>
-#include "../screen_handler/greeting_screen.hpp"
-#include "../screen_handler/sign_screen.hpp"
+#include "../screen_handler/interface.hpp"
 #include "../screen_handler/chat_screen.hpp"
 
 using boost::asio::ip::tcp;
@@ -29,35 +26,17 @@ int main(int argc, char* argv[]) {
     tcp::socket s(io_context);
     tcp::resolver resolver(io_context);
 
-    GreetingScreen greeting_screen;
-    bool is_pressed = false;
-    while (!is_pressed) {
-      is_pressed = greeting_screen.handle_input();
-    }
+    Interface interface;
 
-    SignScreen sign_screen;
-    is_pressed = false;
-    while(!is_pressed) {
-      auto state = sign_screen.handle_input();
-      switch(state) {
-        case SignScreen::Result::Login:
-        case SignScreen::Result::Register:
-          is_pressed = true;
-          break;
-        case SignScreen::Result::Exit:
-          is_pressed = true;
-          break;
-        case SignScreen::Result::None:
-          break;
-      }
-      sign_screen.refresh();
-    }
+    Interface::RenderGreeting();
+    interface.RenderAR();  //TODO: большой иф с выходом, если просто Result::Exit
+    auto user_data = interface.GetUserData();
 
     ChatScreen client_win(argv[1], argv[2]);
     client_win.update_status("Connecting...");
     boost::asio::connect(s, resolver.resolve(argv[1], argv[2]));
     client_win.update_status("Connected");
-    client_win.add_message("Logged as: " + sign_screen.get_login(), true);
+    client_win.add_message("Logged as: " + user_data.login, true);
     client_win.add_message("Type 'exit' to quit", true);
     while (true) {
       if (client_win.handle_input()) {
