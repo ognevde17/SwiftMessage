@@ -46,7 +46,6 @@ class ChatScreen : public AbstractScreen {
   void post_create() override;
 
  private:
-  void init_colors();
   static std::string wrap_text(const std::string& text, int width);
 
   void handle_resize();

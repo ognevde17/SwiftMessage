@@ -5,8 +5,14 @@
 #include "../../include/screen_handler/sign_screen.hpp"
 
 SignScreen::SignScreen() : AbstractScreen() {
-  init_colors();
+  post_create();
   refresh();
+}
+
+void SignScreen::post_create() {
+  wbkgd(main_win_, COLOR_PAIR(DEFAULT_PAIR));
+  wbkgd(content_win_, COLOR_PAIR(DEFAULT_PAIR));
+  keypad(content_win_, true);
 }
 
 void SignScreen::refresh() {
@@ -26,11 +32,11 @@ SignScreen::Result SignScreen::handle_input() {
       handle_resize();
       return Result::None;
     }
-    case (KEY_UP): {
+    case KEY_UP: {
       move_cursor(-1);
       return Result::None;
     }
-    case (KEY_DOWN): {
+    case KEY_DOWN: {
       move_cursor(1);
       return Result::None;
     }
@@ -54,17 +60,7 @@ SignScreen::Result SignScreen::handle_input() {
 
 void SignScreen::create_windows() {
   AbstractScreen::create_windows();
-  keypad(content_win_, true);
-};
-
-void SignScreen::init_colors() {
-  if (has_colors()) {
-    init_pair(ACTIVE_PAIR, COLOR_CYAN, COLOR_BLACK);
-    init_pair(DEFAULT_PAIR, COLOR_WHITE, COLOR_BLACK);
-  }
-  wbkgd(main_win_, COLOR_PAIR(DEFAULT_PAIR));
-  wbkgd(content_win_, COLOR_PAIR(DEFAULT_PAIR));
-};
+}
 
 void SignScreen::handle_resize() {
   delwin(main_win_);
@@ -73,7 +69,7 @@ void SignScreen::handle_resize() {
   wbkgd(main_win_, COLOR_PAIR(DEFAULT_PAIR));
   wbkgd(content_win_, COLOR_PAIR(DEFAULT_PAIR));
   refresh();
-};
+}
 
 void SignScreen::handle_char(int ch) {
   if (ch == KEY_UP || ch == KEY_DOWN) {
@@ -91,7 +87,7 @@ void SignScreen::handle_char(int ch) {
     *field += static_cast<char>(ch);
   }
   refresh();
-};
+}
 
 SignScreen::Result SignScreen::handle_submit() {
   if (current_field_ == (is_registration_ ? 4 : 3)) {
@@ -103,13 +99,13 @@ SignScreen::Result SignScreen::handle_submit() {
     refresh();
   }
   return Result::None;
-};
+}
 
 void SignScreen::move_cursor(int direction) {
   int max_fields = is_registration_ ? 5 : 4;
   current_field_ = (current_field_ + direction + max_fields) % max_fields;
   refresh();
-};
+}
 
 std::string* SignScreen::get_current_field() {
   if (is_registration_) {
@@ -119,13 +115,13 @@ std::string* SignScreen::get_current_field() {
       case (2): return &password_;
     }
   } else {
-    switch(current_field_) {
+    switch (current_field_) {
       case (0): return &login_;
       case (1): return &password_;
     }
   }
   return nullptr;
-};
+}
 
 void SignScreen::draw_field(const std::string &label, const std::string &value,
                             int x, int y, int field_num) {
@@ -152,13 +148,15 @@ void SignScreen::draw_fields() {
 void SignScreen::draw_switcher() {
   int x = COLS / 2 - 4;
   int y = LINES / 2 - (is_registration_ ? 0 : 1);
-  wattron(content_win_, COLOR_PAIR(current_field_ == (is_registration_ ? 3 : 2) ? ACTIVE_PAIR : DEFAULT_PAIR));
+  wattron(content_win_, COLOR_PAIR(current_field_ == (is_registration_ ? 3 : 2)
+                                       ? ACTIVE_PAIR : DEFAULT_PAIR));
   if (is_registration_) {
     mvwprintw(content_win_, y, x, "Sign In");
   } else {
     mvwprintw(content_win_, y, x, "Sign Up");
   }
-  wattroff(content_win_, COLOR_PAIR(current_field_ == (is_registration_ ? 3 : 2) ? ACTIVE_PAIR : DEFAULT_PAIR));
+  wattroff(content_win_, COLOR_PAIR(current_field_ == (is_registration_ ? 3 : 2)
+                                        ? ACTIVE_PAIR : DEFAULT_PAIR));
 }
 
 void SignScreen::draw_submit_button() {
@@ -176,9 +174,9 @@ void SignScreen::draw_submit_button() {
            ACS_HLINE, button_width - 2);
   mvwaddch(content_win_, button_start_y, button_start_x + button_width - 1,
            ACS_URCORNER);
-  for(int i = 1; i < button_height - 1; i++) {
-    mvwaddch(content_win_, button_start_y + i, button_start_x, ACS_VLINE);
-    mvwaddch(content_win_, button_start_y + i,
+  for (int idx = 1; idx < button_height - 1; ++idx) {
+    mvwaddch(content_win_, button_start_y + idx, button_start_x, ACS_VLINE);
+    mvwaddch(content_win_, button_start_y + idx,
              button_start_x + button_width - 1, ACS_VLINE);
   }
   mvwaddch(content_win_, button_start_y + button_height - 1,

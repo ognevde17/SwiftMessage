@@ -7,7 +7,6 @@
 ChatScreen::ChatScreen() : AbstractScreen() {
   create_windows();
   post_create();
-  init_colors();
   refresh();
 }
 
@@ -27,18 +26,9 @@ void ChatScreen::create_windows() {
 void ChatScreen::post_create() {
   box(main_win_, 0, 0);
   wrefresh(main_win_);
-}
-
-void ChatScreen::init_colors() {
-  if (has_colors()) {
-    init_pair(DEFAULT_PAIR, COLOR_WHITE, COLOR_BLACK);
-    init_pair(ACTIVE_PAIR, COLOR_CYAN, COLOR_BLACK);
-    init_pair(SYSTEM_NOTIFICATION_PAIR, COLOR_RED, COLOR_BLACK);
-    init_pair(SENDER_PAIR, COLOR_BLUE, COLOR_BLACK);
-  }
-  wbkgd(contacts_win_, COLOR_PAIR(DEFAULT_PAIR));
-  wbkgd(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
-  wbkgd(input_win_, COLOR_PAIR(DEFAULT_PAIR));
+  wbkgd(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));
+  wbkgd(chat_win_, COLOR_PAIR(ACTIVE_PAIR));
+  wbkgd(input_win_, COLOR_PAIR(ACTIVE_PAIR));
 }
 
 void ChatScreen::refresh() {
@@ -140,7 +130,9 @@ void ChatScreen::handle_resize() {
   delwin(input_win_);
   delwin(chat_win_);
   create_windows();
-  init_colors();
+  wbkgd(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));
+  wbkgd(chat_win_, COLOR_PAIR(ACTIVE_PAIR));
+  wbkgd(input_win_, COLOR_PAIR(ACTIVE_PAIR));
   refresh();
 }
 
@@ -186,37 +178,32 @@ void ChatScreen::draw_contacts() {
 void ChatScreen::draw_chat() {
   werase(chat_win_);
   box(chat_win_, 0, 0);
-  const int kVisibleLine = getmaxy(chat_win_) - 2;
-  int start_idx =
-      std::max(0, static_cast<int>
-               (messages_.size() - kVisibleLine - scroll_position_));
-  for (int idx = 0; idx < kVisibleLine; ++idx) {
-    int message_idx = start_idx + idx;
-    if (message_idx >= static_cast<int>(messages_.size())) {
-      break;
-    }
-    const auto& message = messages_[message_idx];
+  int col = 1;
+  int start_msg = std::max(0, scroll_position_);
+  int end_msg = std::min(start_msg + getmaxy(chat_win_) - 2,
+                         static_cast<int>(messages_.size()));
+  for (int idx = start_msg; idx < end_msg && col < getmaxy(chat_win_) - 1; ++idx) {
+    const auto& message = messages_[idx];
     wattron(chat_win_, COLOR_PAIR(message.type));
-    int line = idx + 1;
     size_t pos = 0;
-    while (pos < message.text.length() && line < kVisibleLine) {
+    while (pos < message.text.length() && col < getmaxy(chat_win_) - 1) {
       size_t end = message.text.find('\n', pos);
       if (end == std::string::npos) {
         end = message.text.length();
       }
-      mvwprintw(chat_win_, line++, 2, "%.*s", static_cast<int>(end - pos),
-                message.text.c_str() + pos);
+      mvwprintw(chat_win_, col++, 2, "%.*s",
+                static_cast<int>(end-pos), message.text.c_str()+pos);
       pos = end + 1;
     }
     wattroff(chat_win_, COLOR_PAIR(message.type));
   }
-  if (scroll_position_ > 0 ||
-      start_idx + kVisibleLine < static_cast<int>(messages_.size())) {
-    std::string scroll_title = "^ " + std::to_string(scroll_position_ + 1)
-                               + "/" + std::to_string(messages_.size())
-                               + " v";
-    mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_title.length() - 1,
-              "%s", scroll_title.c_str());
+  if (scroll_position_ > 0 || end_msg < static_cast<int>(messages_.size())) {
+    wattron(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
+    std::string scroll_ind = "^ " + std::to_string(scroll_position_+1)
+                             + "/" + std::to_string(messages_.size()) + " v";
+    mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_ind.length() - 1,
+              "%s", scroll_ind.c_str());
+    wattroff(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
   }
   wrefresh(chat_win_);
 }
@@ -224,7 +211,10 @@ void ChatScreen::draw_chat() {
 void ChatScreen::draw_input_field() {
   werase(input_win_);
   box(input_win_, 0, 0);
-  mvwprintw(input_win_, 1, 2, "> %s", current_input_.c_str());
+  mvwprintw(input_win_, 1, 2, "> ");
+  wattron(input_win_, COLOR_PAIR(DEFAULT_PAIR));
+  mvwprintw(input_win_, 1, 4, "%s", current_input_.c_str());
+  wattroff(input_win_, COLOR_PAIR(DEFAULT_PAIR));
   wmove(input_win_, 1, 2 + current_input_.length() + 1);
   wrefresh(input_win_);
 }

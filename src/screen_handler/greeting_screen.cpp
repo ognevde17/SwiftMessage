@@ -6,7 +6,7 @@
 
 GreetingScreen::GreetingScreen() : AbstractScreen() {
   curs_set(0);
-  setup_colors();
+  post_create();
   draw_ui();
 }
 
@@ -27,23 +27,19 @@ void GreetingScreen::refresh() {
 
 void GreetingScreen::create_windows() {
   main_win_ = newwin(LINES, COLS, 0, 0);
-  keypad(main_win_, true);
-  wtimeout(main_win_, 100);
 }
 
-void GreetingScreen::setup_colors() {
-  if (has_colors()) {
-    init_pair(ACTIVE_PAIR, COLOR_CYAN, COLOR_BLACK);
-    init_pair(DEFAULT_PAIR, COLOR_WHITE, COLOR_BLACK);
-  }
-  wbkgd(main_win_, COLOR_PAIR(DEFAULT_PAIR));
+void GreetingScreen::post_create() {
+  keypad(main_win_, true);
+  wtimeout(main_win_, 100);
+  wbkgd(main_win_, COLOR_PAIR(ACTIVE_PAIR));
 }
 
 void GreetingScreen::handle_resize() {
   wclear(main_win_);
   delwin(main_win_);
   create_windows();
-  setup_colors();
+  post_create();
   draw_ui();
 }
 

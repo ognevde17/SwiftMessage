@@ -14,6 +14,7 @@ option(BUILD_SERVER "Build SwiftMessage server"    ON)
 option(BUILD_DB_TEST "Build database tests"        OFF)
 
 find_package(Boost REQUIRED COMPONENTS system thread serialization)
+find_package(Curses REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
@@ -43,10 +44,16 @@ endif()
 
 if (BUILD_CLIENT)
     add_executable(${CLIENT_NAME}
-        src/client/main.cpp
-        src/client/connection_manager.cpp
-        src/client/client.cpp
-        src/client/interface.cpp
+#        src/client/main.cpp
+#        src/client/connection_manager.cpp
+#        src/client/client.cpp
+#        src/client/interface.cpp
+        src/client/test.cpp
+        src/screen_handler/interface.cpp
+        src/screen_handler/sign_screen.cpp
+        src/screen_handler/chat_screen.cpp
+        src/screen_handler/greeting_screen.cpp
+        src/screen_handler/abstract_screen.cpp
     )
 
     target_link_libraries(${CLIENT_NAME}
@@ -54,6 +61,7 @@ if (BUILD_CLIENT)
         Boost::system
         Boost::thread
         Boost::serialization
+        ${CURSES_LIBRARIES}
     )
 endif()
 

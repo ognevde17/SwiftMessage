@@ -29,9 +29,9 @@ class SignScreen : public AbstractScreen {
  protected:
   void create_windows() override;
 
- private:
-  void init_colors();
+  void post_create() override;
 
+ private:
   void handle_resize();
 
   void handle_char(int ch);

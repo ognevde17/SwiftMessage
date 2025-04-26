@@ -5,7 +5,6 @@
 #include "../../include/screen_handler/abstract_screen.hpp"
 
 AbstractScreen::AbstractScreen() {
-  init_ncurses();
   create_windows();
   post_create();
 }
@@ -35,18 +34,4 @@ AbstractScreen::~AbstractScreen() {
   delwin(main_win_);
   delwin(content_win_);
   endwin();
-}
-
-void AbstractScreen::init_ncurses() {
-  if (!ncurses_initialized_) {
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, true);
-    if (has_colors()) {
-      start_color();
-      use_default_colors();
-    }
-    ncurses_initialized_ = true;
-  }
 }

@@ -4,6 +4,11 @@
 
 #include "../../include/screen_handler/interface.hpp"
 
+Interface::Interface() {
+  init_ncurses();
+  setup_colors();
+}
+
 void Interface::RenderGreeting() {
   GreetingScreen greeting_screen;
   bool is_pressed = false;
@@ -37,12 +42,12 @@ Result Interface::RenderAR() {
   return state;
 }
 
-template <typename... Args>
-void Interface::RenderChat(Args&&... messages) {
+//template <typename... Args>
+void Interface::RenderChat() {
   chat_screen_ = new ChatScreen();
-  if constexpr (sizeof... (messages) > 0) {
-    chat_screen_->update_messages(std::forward<Args>(messages)...);
-  }
+//  if constexpr (sizeof... (messages) > 0) {
+//    chat_screen_->update_messages(std::forward<Args>(messages)...);
+//  }
   chat_screen_->refresh();
 }
 
@@ -79,5 +84,29 @@ void Interface::ClearChat() { chat_screen_->clear_chat(); }
 Interface::~Interface() {
   if (chat_screen_ != nullptr) {
     delete chat_screen_;
+  }
+  endwin();
+}
+
+void Interface::init_ncurses() {
+  if (!ncurses_initialized_) {
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, true);
+    if (has_colors()) {
+      start_color();
+      use_default_colors();
+    }
+    ncurses_initialized_ = true;
+  }
+}
+
+void Interface::setup_colors() {
+  if (has_colors()) {
+    init_pair(DEFAULT_PAIR, COLOR_WHITE, COLOR_BLACK);
+    init_pair(ACTIVE_PAIR, COLOR_CYAN, COLOR_BLACK);
+    init_pair(SENDER_PAIR, COLOR_BLUE, COLOR_BLACK);
+    init_pair(SYSTEM_NOTIFICATION_PAIR, COLOR_RED, COLOR_BLACK);
   }
 }

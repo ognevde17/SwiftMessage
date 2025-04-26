@@ -23,7 +23,7 @@ struct UserData {
 class Interface {
  public:
   // Дефолт </3
-  Interface() = default;
+  Interface();
 
   // Экран приветствия. Он сам закончится тогда, когда пользователь на кнопку нажмет
   static void RenderGreeting();
@@ -38,8 +38,8 @@ class Interface {
 
   // Экран чата. Если есть аргумент (вектор с сообщениями), то он сразу их выведет
   // Если нет, то пустой чат
-  template <typename... Args>
-  void RenderChat(Args&&... messages);
+//  template <typename... Args>
+  void RenderChat();
   // Прогрузить вектор сообщений и обновить чат
   void UpdateMessages(const std::vector<Message>& messages);
 
@@ -55,8 +55,13 @@ class Interface {
   ~Interface();
 
  private:
+  void init_ncurses();
+
+  void setup_colors();
+
   UserData user_data_;
   ChatScreen* chat_screen_{nullptr};
+  static bool ncurses_initialized_;
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_INTERFACE_HPP_

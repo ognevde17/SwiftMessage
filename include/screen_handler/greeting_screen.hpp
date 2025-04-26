@@ -18,9 +18,9 @@ class GreetingScreen : public AbstractScreen {
  protected:
   void create_windows() override;
 
- private:
-  void setup_colors();
+  void post_create() override;
 
+ private:
   void handle_resize();
 
   void draw_ui();
