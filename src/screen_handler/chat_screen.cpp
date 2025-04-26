@@ -33,6 +33,8 @@ void ChatScreen::init_colors() {
   if (has_colors()) {
     init_pair(DEFAULT_PAIR, COLOR_WHITE, COLOR_BLACK);
     init_pair(ACTIVE_PAIR, COLOR_CYAN, COLOR_BLACK);
+    init_pair(SYSTEM_NOTIFICATION_PAIR, COLOR_RED, COLOR_BLACK);
+    init_pair(SENDER_PAIR, COLOR_BLUE, COLOR_BLACK);
   }
   wbkgd(contacts_win_, COLOR_PAIR(DEFAULT_PAIR));
   wbkgd(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
@@ -106,8 +108,8 @@ std::string ChatScreen::wrap_text(const std::string& text, int width) {
   return result;
 }
 
-void ChatScreen::add_message(const std::string& message, bool is_reply) {
-  messages_.push_back({wrap_text(message, getmaxx(chat_win_) - 4), is_reply});
+void ChatScreen::add_message(const std::string& message, ColorPairs type) {
+  messages_.push_back({wrap_text(message, getmaxx(chat_win_) - 4), type});
   if (messages_.size() > static_cast<size_t>(kMaxMessages)) {
     messages_.erase(messages_.begin());
   }
@@ -194,8 +196,7 @@ void ChatScreen::draw_chat() {
       break;
     }
     const auto& message = messages_[message_idx];
-    wattron(chat_win_, COLOR_PAIR(message.is_reply ?
-                                                   ACTIVE_PAIR : DEFAULT_PAIR));
+    wattron(chat_win_, COLOR_PAIR(message.type));
     int line = idx + 1;
     size_t pos = 0;
     while (pos < message.text.length() && line < kVisibleLine) {
@@ -207,8 +208,7 @@ void ChatScreen::draw_chat() {
                 message.text.c_str() + pos);
       pos = end + 1;
     }
-    wattroff(chat_win_, COLOR_PAIR(message.is_reply ?
-                                                    ACTIVE_PAIR : DEFAULT_PAIR));
+    wattroff(chat_win_, COLOR_PAIR(message.type));
   }
   if (scroll_position_ > 0 ||
       start_idx + kVisibleLine < static_cast<int>(messages_.size())) {

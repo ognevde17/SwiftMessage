@@ -52,16 +52,16 @@ void Interface::UpdateMessages(const std::vector<Message>& messages) {
 }
 
 void Interface::DisplayAnnouncement(const std::string& message) {
-  chat_screen_->add_message("[INFO] " + message, true);
+  chat_screen_->add_message("[INFO] " + message, SYSTEM_NOTIFICATION_PAIR);
 }
 
 void Interface::DisplayError(const std::string& message) {
-  chat_screen_->add_message("[ERROR] " + message, true);
+  chat_screen_->add_message("[ERROR] " + message, SYSTEM_NOTIFICATION_PAIR);
 }
 
 void Interface::DisplayMessage(const std::string& sender,
                                const std::string& message) {
-  chat_screen_->add_message(sender + ": " + message, true);
+  chat_screen_->add_message(sender + ": " + message, ACTIVE_PAIR);
 }
 
 std::string Interface::GetInputMessage() {

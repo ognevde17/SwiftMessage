@@ -11,12 +11,10 @@
 #include <string>
 
 enum ColorPairs {
-  CONTACTS_PAIR = 1,
-  CHAT_PAIR,
-  REPLY_PAIR,
-  INPUT_PAIR,
   DEFAULT_PAIR,
-  ACTIVE_PAIR
+  ACTIVE_PAIR,
+  SYSTEM_NOTIFICATION_PAIR,
+  SENDER_PAIR
 };
 
 class AbstractScreen {

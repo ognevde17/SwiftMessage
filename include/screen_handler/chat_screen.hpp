@@ -12,11 +12,11 @@
 struct Message {
   Message() = default;
 
-  Message(std::string&& message, bool is_reply = false)
-      : text(std::move(message)), is_reply(is_reply) {}
+  Message(std::string&& message, ColorPairs type = DEFAULT_PAIR)
+      : text(std::move(message)), type(type) {}
 
   std::string text;
-  bool is_reply;
+  ColorPairs type;
 };
 
 class ChatScreen : public AbstractScreen {
@@ -36,7 +36,7 @@ class ChatScreen : public AbstractScreen {
   void refresh() override;
   void update_messages(const std::vector<Message>& messages);
   void update_status(const std::string& status);
-  void add_message(const std::string& message, bool is_reply = false);
+  void add_message(const std::string& message, ColorPairs type = DEFAULT_PAIR);
 
   void clear_chat();
   ~ChatScreen() override;

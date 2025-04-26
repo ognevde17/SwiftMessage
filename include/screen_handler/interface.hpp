@@ -44,7 +44,7 @@ class Interface {
   void UpdateMessages(const std::vector<Message>& messages);
 
   void DisplayAnnouncement(const std::string& message);
-  void DisplayError(const std::string& message);
+  void DisplayError(const std::string& message); // TODO(Sheyme): выделять цветом эти объявления, отправителя тоже
   void DisplayMessage(const std::string& sender, const std::string& message);
 
   std::string GetSenderLogin();  // TODO(Sheyme): потом сделаю
