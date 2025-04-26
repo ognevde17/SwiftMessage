@@ -10,3 +10,9 @@ build-server/*
 
 cmake-build-debug/*
 cmake-build-debug
+
+.idea
+.idea/
+
+.clang-tidy
+.clang-format
