@@ -18,10 +18,10 @@ find_package(Curses REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
-if (BUILD_SERVER OR BUILD_DB_TEST)
-  find_package(PostgreSQL REQUIRED)
-  find_library(PQXX_LIB pqxx)
-endif()
+#if (BUILD_SERVER OR BUILD_DB_TEST)
+#  find_package(PostgreSQL REQUIRED)
+#  find_library(PQXX_LIB pqxx)
+#endif()
 
 if (BUILD_SERVER)
     add_executable(${SERVER_NAME}

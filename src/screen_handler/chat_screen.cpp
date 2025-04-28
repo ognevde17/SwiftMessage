@@ -26,14 +26,16 @@ void ChatScreen::create_windows() {
 void ChatScreen::post_create() {
   box(main_win_, 0, 0);
   wrefresh(main_win_);
-  wbkgd(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));
-  wbkgd(chat_win_, COLOR_PAIR(ACTIVE_PAIR));
-  wbkgd(input_win_, COLOR_PAIR(ACTIVE_PAIR));
+  draw_background();
 }
 
 void ChatScreen::refresh() {
   werase(main_win_);
   draw_layout();
+}
+
+void ChatScreen::update_username(const std::string& username) {
+  username_ = username;
 }
 
 void ChatScreen::update_messages(const std::vector<Message>& messages) {
@@ -130,9 +132,7 @@ void ChatScreen::handle_resize() {
   delwin(input_win_);
   delwin(chat_win_);
   create_windows();
-  wbkgd(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));
-  wbkgd(chat_win_, COLOR_PAIR(ACTIVE_PAIR));
-  wbkgd(input_win_, COLOR_PAIR(ACTIVE_PAIR));
+  draw_background();
   refresh();
 }
 
@@ -150,16 +150,21 @@ void ChatScreen::handle_scroll(int direction) {
   draw_chat();
 }
 
-void ChatScreen::update_status(const std::string& status) {
-  status_ = wrap_text(status, getmaxx(contacts_win_) - 4);
+void ChatScreen::draw_background() {
+  if (has_colors()) {
+    wbkgd(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));
+    wbkgd(chat_win_, COLOR_PAIR(ACTIVE_PAIR));
+    wbkgd(input_win_, COLOR_PAIR(ACTIVE_PAIR));
+  }
 }
 
 void ChatScreen::draw_contacts() {
   werase(contacts_win_);
   box(contacts_win_, 0, 0);
-  std::string title = host_ + ':' + port_;
-  mvwprintw(contacts_win_, 0, (getmaxx(contacts_win_) - title.length()) / 2,
-            "%s", title.c_str());
+  apply_color(contacts_win_, DEFAULT_PAIR, true);
+  mvwprintw(contacts_win_, 0, (getmaxx(contacts_win_) - username_.length()) / 2,
+            "%s", username_.c_str());
+  apply_color(contacts_win_, DEFAULT_PAIR, false);
   int line = 2;
   size_t start = 0;
   while (start < status_.length() && line < static_cast<size_t>
@@ -184,7 +189,7 @@ void ChatScreen::draw_chat() {
                          static_cast<int>(messages_.size()));
   for (int idx = start_msg; idx < end_msg && col < getmaxy(chat_win_) - 1; ++idx) {
     const auto& message = messages_[idx];
-    wattron(chat_win_, COLOR_PAIR(message.type));
+    apply_color(chat_win_, message.type, true);
     size_t pos = 0;
     while (pos < message.text.length() && col < getmaxy(chat_win_) - 1) {
       size_t end = message.text.find('\n', pos);
@@ -195,15 +200,15 @@ void ChatScreen::draw_chat() {
                 static_cast<int>(end-pos), message.text.c_str()+pos);
       pos = end + 1;
     }
-    wattroff(chat_win_, COLOR_PAIR(message.type));
+    apply_color(chat_win_, message.type, false);
   }
   if (scroll_position_ > 0 || end_msg < static_cast<int>(messages_.size())) {
-    wattron(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
+    apply_color(chat_win_, DEFAULT_PAIR, true);
     std::string scroll_ind = "^ " + std::to_string(scroll_position_+1)
                              + "/" + std::to_string(messages_.size()) + " v";
     mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_ind.length() - 1,
               "%s", scroll_ind.c_str());
-    wattroff(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
+    apply_color(chat_win_, DEFAULT_PAIR, false);
   }
   wrefresh(chat_win_);
 }
@@ -212,9 +217,9 @@ void ChatScreen::draw_input_field() {
   werase(input_win_);
   box(input_win_, 0, 0);
   mvwprintw(input_win_, 1, 2, "> ");
-  wattron(input_win_, COLOR_PAIR(DEFAULT_PAIR));
+  apply_color(input_win_, DEFAULT_PAIR, true);
   mvwprintw(input_win_, 1, 4, "%s", current_input_.c_str());
-  wattroff(input_win_, COLOR_PAIR(DEFAULT_PAIR));
+  apply_color(input_win_, DEFAULT_PAIR, false);
   wmove(input_win_, 1, 2 + current_input_.length() + 1);
   wrefresh(input_win_);
 }

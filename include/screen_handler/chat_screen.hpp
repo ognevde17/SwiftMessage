@@ -35,8 +35,9 @@ class ChatScreen : public AbstractScreen {
 
   void refresh() override;
   void update_messages(const std::vector<Message>& messages);
-  void update_status(const std::string& status);
   void add_message(const std::string& message, ColorPairs type = DEFAULT_PAIR);
+
+  void update_username(const std::string& username);
 
   void clear_chat();
   ~ChatScreen() override;
@@ -52,6 +53,7 @@ class ChatScreen : public AbstractScreen {
   void handle_char(int ch);
   void handle_scroll(int direction);
 
+  void draw_background();
   void draw_contacts();
   void draw_chat();
   void draw_input_field();
@@ -60,12 +62,16 @@ class ChatScreen : public AbstractScreen {
   WINDOW* contacts_win_;
   WINDOW* chat_win_;
   WINDOW* input_win_;
+
   std::string host_;
   std::string port_;
-  std::string status_;
+  std::string status_ = "Server";
+
+  int scroll_position_{0};
+  std::string username_;
+
   std::string current_input_;
   std::vector<Message> messages_;
-  int scroll_position_{0};
   const int kMaxMessages = 1000;
 };
 

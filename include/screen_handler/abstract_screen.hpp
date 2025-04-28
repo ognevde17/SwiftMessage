@@ -8,6 +8,7 @@
 #pragma once
 
 #include <ncurses.h>
+#include <unordered_map>
 #include <string>
 
 enum ColorPairs {
@@ -15,6 +16,19 @@ enum ColorPairs {
   ACTIVE_PAIR,
   SYSTEM_NOTIFICATION_PAIR,
   SENDER_PAIR
+};
+
+enum class TextAttribute {
+  NORMAL = A_NORMAL,
+  BOLD = A_BOLD,
+  UNDERLINE = A_UNDERLINE,
+  REVERSE = A_REVERSE,
+  BLINK = A_BLINK
+};
+
+struct Format {
+  ColorPairs color_pair;
+  TextAttribute format_attribute;
 };
 
 class AbstractScreen {
@@ -29,6 +43,13 @@ class AbstractScreen {
   virtual void create_windows();
 
   virtual void post_create();
+
+  virtual Format get_format(const ColorPairs& pair);
+
+  virtual void apply_color(WINDOW* win, const ColorPairs& pair, bool state);
+
+  virtual void draw_button(WINDOW* win, int x, int y, ColorPairs color,
+                           const std::string& label);
 
   virtual ~AbstractScreen();
 

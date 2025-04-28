@@ -10,8 +10,7 @@ SignScreen::SignScreen() : AbstractScreen() {
 }
 
 void SignScreen::post_create() {
-  wbkgd(main_win_, COLOR_PAIR(DEFAULT_PAIR));
-  wbkgd(content_win_, COLOR_PAIR(DEFAULT_PAIR));
+  draw_backgrounds();
   keypad(content_win_, true);
 }
 
@@ -66,8 +65,7 @@ void SignScreen::handle_resize() {
   delwin(main_win_);
   delwin(content_win_);
   create_windows();
-  wbkgd(main_win_, COLOR_PAIR(DEFAULT_PAIR));
-  wbkgd(content_win_, COLOR_PAIR(DEFAULT_PAIR));
+  draw_backgrounds();
   refresh();
 }
 
@@ -123,13 +121,27 @@ std::string* SignScreen::get_current_field() {
   return nullptr;
 }
 
-void SignScreen::draw_field(const std::string &label, const std::string &value,
+void SignScreen::draw_backgrounds() {
+  if (has_colors()) {
+    wbkgd(main_win_, COLOR_PAIR(DEFAULT_PAIR));
+    wbkgd(content_win_, COLOR_PAIR(DEFAULT_PAIR));
+  }
+}
+
+void SignScreen::draw_borders() {
+  apply_color(main_win_, ACTIVE_PAIR, true);
+  box(main_win_, 0, 0);
+  apply_color(main_win_, ACTIVE_PAIR, false);
+}
+
+void SignScreen::draw_field(const std::string& label, const std::string& value,
                             int x, int y, int field_num) {
-  bool active = (field_num == current_field_);
-  wattron(content_win_, COLOR_PAIR(active ? ACTIVE_PAIR : DEFAULT_PAIR));
+  ColorPairs current_color = (field_num == current_field_)
+      ? ACTIVE_PAIR : DEFAULT_PAIR;
+  apply_color(content_win_, current_color, true);
   mvwprintw(content_win_, y, x, "%s", label.c_str());
   wprintw(content_win_, "[%-20s]", value.c_str());
-  wattroff(content_win_, COLOR_PAIR(active ? ACTIVE_PAIR : DEFAULT_PAIR));
+  apply_color(content_win_, current_color, false);
 }
 
 void SignScreen::draw_fields() {
@@ -148,47 +160,23 @@ void SignScreen::draw_fields() {
 void SignScreen::draw_switcher() {
   int x = COLS / 2 - 4;
   int y = LINES / 2 - (is_registration_ ? 0 : 1);
-  wattron(content_win_, COLOR_PAIR(current_field_ == (is_registration_ ? 3 : 2)
-                                       ? ACTIVE_PAIR : DEFAULT_PAIR));
+  ColorPairs current_color = current_field_ == (is_registration_ ? 3 : 2)
+      ? ACTIVE_PAIR : DEFAULT_PAIR;
+  apply_color(content_win_, current_color, true);
   if (is_registration_) {
     mvwprintw(content_win_, y, x, "Sign In");
   } else {
     mvwprintw(content_win_, y, x, "Sign Up");
   }
-  wattroff(content_win_, COLOR_PAIR(current_field_ == (is_registration_ ? 3 : 2)
-                                        ? ACTIVE_PAIR : DEFAULT_PAIR));
+  apply_color(content_win_, current_color, false);
 }
 
 void SignScreen::draw_submit_button() {
   int x = COLS / 2;
   int y = LINES / 2 - (is_registration_ ? -3 : -1);
-  bool active = (current_field_ == (is_registration_ ? 4 : 3));
-  std::string button_text = " Submit ";
-  int button_width = static_cast<int>(button_text.length()) + 2;
-  int button_height = 3;
-  int button_start_x = x - button_width / 2;
-  int button_start_y = y + 1;
-  wattron(content_win_, COLOR_PAIR(active ? ACTIVE_PAIR : DEFAULT_PAIR));
-  mvwaddch(content_win_, button_start_y, button_start_x, ACS_ULCORNER);
-  mvwhline(content_win_, button_start_y, button_start_x + 1,
-           ACS_HLINE, button_width - 2);
-  mvwaddch(content_win_, button_start_y, button_start_x + button_width - 1,
-           ACS_URCORNER);
-  for (int idx = 1; idx < button_height - 1; ++idx) {
-    mvwaddch(content_win_, button_start_y + idx, button_start_x, ACS_VLINE);
-    mvwaddch(content_win_, button_start_y + idx,
-             button_start_x + button_width - 1, ACS_VLINE);
-  }
-  mvwaddch(content_win_, button_start_y + button_height - 1,
-           button_start_x, ACS_LLCORNER);
-  mvwhline(content_win_, button_start_y + button_height - 1, button_start_x + 1,
-           ACS_HLINE, button_width - 2);
-  mvwaddch(content_win_, button_start_y + button_height - 1,
-           button_start_x + button_width - 1, ACS_LRCORNER);
-  mvwprintw(content_win_, button_start_y + 1,
-            x - static_cast<int>(button_text.length()) / 2,
-            "%s", button_text.c_str());
-  wattroff(content_win_, COLOR_PAIR(active ? ACTIVE_PAIR : DEFAULT_PAIR));
+  ColorPairs current_color = current_field_ == (is_registration_ ? 4 : 3)
+      ? ACTIVE_PAIR : DEFAULT_PAIR;
+  draw_button(content_win_, x, y, current_color, " Submit ");
 }
 
 void SignScreen::clear_fields() {

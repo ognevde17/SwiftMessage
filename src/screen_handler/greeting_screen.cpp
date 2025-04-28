@@ -32,7 +32,9 @@ void GreetingScreen::create_windows() {
 void GreetingScreen::post_create() {
   keypad(main_win_, true);
   wtimeout(main_win_, 100);
-  wbkgd(main_win_, COLOR_PAIR(ACTIVE_PAIR));
+  if (has_colors()) {
+    wbkgd(main_win_, COLOR_PAIR(ACTIVE_PAIR));
+  }
 }
 
 void GreetingScreen::handle_resize() {
@@ -46,42 +48,15 @@ void GreetingScreen::handle_resize() {
 void GreetingScreen::draw_ui() {
   werase(main_win_);
   box(main_win_, 0, 0);
-  int center_y = LINES / 2;
-  int center_x = COLS / 2;
-
+  int x = COLS / 2;
+  int y = LINES / 2;
   std::string greeting = "Hello!";
   wattron(main_win_, COLOR_PAIR(ACTIVE_PAIR));
-  mvwprintw(main_win_, center_y - 4,
-            center_x - static_cast<int>(greeting.length()) / 2,
+  mvwprintw(main_win_, y - 4,
+            x - static_cast<int>(greeting.length()) / 2,
             "%s", greeting.c_str());
   wattroff(main_win_, COLOR_PAIR(ACTIVE_PAIR));
-
-  std::string button_text = " Continue ";
-  int button_width = static_cast<int>(button_text.length()) + 2;
-  int button_height = 3;
-  int button_start_x = center_x - button_width/2;
-  int button_start_y = center_y + 1;
-  wattron(main_win_, COLOR_PAIR(ACTIVE_PAIR));
-  mvwaddch(main_win_, button_start_y, button_start_x, ACS_ULCORNER);
-  mvwhline(main_win_, button_start_y, button_start_x + 1,
-           ACS_HLINE, button_width - 2);
-  mvwaddch(main_win_, button_start_y, button_start_x + button_width - 1,
-           ACS_URCORNER);
-  for(int i = 1; i < button_height - 1; i++) {
-    mvwaddch(main_win_, button_start_y + i, button_start_x, ACS_VLINE);
-    mvwaddch(main_win_, button_start_y + i,
-             button_start_x + button_width - 1, ACS_VLINE);
-  }
-  mvwaddch(main_win_, button_start_y + button_height - 1,
-           button_start_x, ACS_LLCORNER);
-  mvwhline(main_win_, button_start_y + button_height - 1, button_start_x + 1,
-           ACS_HLINE, button_width - 2);
-  mvwaddch(main_win_, button_start_y + button_height - 1,
-           button_start_x + button_width - 1, ACS_LRCORNER);
-  mvwprintw(main_win_, button_start_y + 1,
-            center_x - static_cast<int>(button_text.length()) / 2,
-            "%s", button_text.c_str());
-  wattroff(main_win_, COLOR_PAIR(ACTIVE_PAIR));
+  draw_button(main_win_, x, y, ACTIVE_PAIR, " Continue ");
 
   wrefresh(main_win_);
 }

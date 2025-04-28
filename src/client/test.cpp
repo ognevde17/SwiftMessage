@@ -16,7 +16,7 @@ int main() {
     auto user_data = interface.GetUserData();
 //    std::vector<std::string> test_vec;
     interface.RenderChat();
-    interface.DisplayAnnouncement("Logged as:" + user_data.login);
+    interface.DisplayAnnouncement("Logged as: " + user_data.login);
     interface.DisplayAnnouncement("Type exit to quit");
 
     while (true) {

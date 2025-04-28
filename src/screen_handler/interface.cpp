@@ -45,6 +45,7 @@ Result Interface::RenderAR() {
 //template <typename... Args>
 void Interface::RenderChat() {
   chat_screen_ = new ChatScreen();
+  chat_screen_->update_username(user_data_.login);  //TODO(Sheyme): потом сюда юзернейм кидать, а не логин
 //  if constexpr (sizeof... (messages) > 0) {
 //    chat_screen_->update_messages(std::forward<Args>(messages)...);
 //  }
