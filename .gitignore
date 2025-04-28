@@ -1,19 +1,10 @@
-.vscode/*
 
-build/*
-build
+build/
+build-client/
+build-server/
+cmake-build-debug/
 
-build-client/*
-
-build-server/*
-
-.DS_Store
-
-cmake-build-debug/*
-cmake-build-debug
-
-.idea
+.vscode/
 .idea/
 
-.clang-tidy
-.clang-format
+.DS_Store
