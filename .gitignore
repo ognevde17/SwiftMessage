@@ -1,6 +1,7 @@
 .vscode/*
 
 build/*
+build
 
 build-client/*
 
@@ -16,5 +17,3 @@ cmake-build-debug
 
 .clang-tidy
 .clang-format
-
-CMakeLists.txt

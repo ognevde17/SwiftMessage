@@ -7,13 +7,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SERVER_NAME ${PROJECT_NAME}_Server)
 set(CLIENT_NAME ${PROJECT_NAME}_Client)
 set(DB_TEST_NAME ${PROJECT_NAME}_DbTest)
-set(INTERFACE_TEST_NAME ${PROJECT_SOURCE_DIR}_InterfaceTest)
+set(INTERFACE_TEST_NAME ${PROJECT_NAME}_InterfaceTest)
 
 # Дефолтные значения тех, кого мы будем собирать
-option(BUILD_CLIENT "Build SwiftMessage client"    OFF)
-option(BUILD_SERVER "Build SwiftMessage server"    OFF)
-option(BUILD_DB_TEST "Build database tests"        OFF)
-option(BUILD_INTERFACE_TEST "Build interface test" ON)
+#option(BUILD_CLIENT "Build SwiftMessage client"    OFF)
+#option(BUILD_SERVER "Build SwiftMessage server"    OFF)
+#option(BUILD_DB_TEST "Build database tests"        OFF)
+#option(BUILD_INTERFACE_TEST "Build interface test" ON)
 
 find_package(Boost REQUIRED COMPONENTS system thread serialization)
 
