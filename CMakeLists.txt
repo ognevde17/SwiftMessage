@@ -9,12 +9,6 @@ set(CLIENT_NAME ${PROJECT_NAME}_Client)
 set(DB_TEST_NAME ${PROJECT_NAME}_DbTest)
 set(INTERFACE_TEST_NAME ${PROJECT_NAME}_InterfaceTest)
 
-# Дефолтные значения тех, кого мы будем собирать
-#option(BUILD_CLIENT "Build SwiftMessage client"    OFF)
-#option(BUILD_SERVER "Build SwiftMessage server"    OFF)
-#option(BUILD_DB_TEST "Build database tests"        OFF)
-#option(BUILD_INTERFACE_TEST "Build interface test" ON)
-
 find_package(Boost REQUIRED CONFIG COMPONENTS system thread serialization)
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})

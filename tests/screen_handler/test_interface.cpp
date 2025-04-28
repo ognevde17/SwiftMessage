@@ -17,7 +17,7 @@ int main() {
     interface.RenderAR();
     auto user_data = interface.GetUserData();
 
-    auto messages = Utils::GenerateRandomMessages(40);
+    auto messages = utils::GenerateRandomMessages(testing_data::kMessagesCount);
 
     interface.RenderChat(std::move(messages));
     interface.DisplayAnnouncement("Logged as: " + user_data.login);
@@ -28,7 +28,8 @@ int main() {
       if (user_input == "exit") {
         interface.DisplayAnnouncement("Disconnecting..");
         break;
-      } else if (user_input == "error") {
+      }
+      if (user_input == "error") {
         interface.DisplayError("Testing error");
       } else {
         interface.DisplayMessage("Server", std::string(user_input));
