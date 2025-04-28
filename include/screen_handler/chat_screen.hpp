@@ -34,6 +34,7 @@ class ChatScreen : public AbstractScreen {
   std::string get_current_input();
 
   void refresh() override;
+  void update_messages(std::vector<Message>&& messages);
   void update_messages(const std::vector<Message>& messages);
   void add_message(const std::string& message, ColorPairs type = DEFAULT_PAIR);
 

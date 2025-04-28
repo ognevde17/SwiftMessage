@@ -38,6 +38,10 @@ void ChatScreen::update_username(const std::string& username) {
   username_ = username;
 }
 
+void ChatScreen::update_messages(std::vector<Message>&& messages) {
+  messages_ = std::move(messages);
+}
+
 void ChatScreen::update_messages(const std::vector<Message>& messages) {
   messages_ = messages;
 }

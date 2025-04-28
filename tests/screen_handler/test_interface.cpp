@@ -1,9 +1,11 @@
 //
-// Created by sheyme
+// Created by sheyme on 28/04/25.
 //
+
 #include <iostream>
 
 #include "../../include/screen_handler/interface.hpp"
+#include "utils.hpp"
 
 bool Interface::ncurses_initialized_ = false;
 
@@ -14,8 +16,10 @@ int main() {
     Interface::RenderGreeting();
     interface.RenderAR();
     auto user_data = interface.GetUserData();
-//    std::vector<std::string> test_vec;
-    interface.RenderChat();
+
+    auto messages = Utils::GenerateRandomMessages(40);
+
+    interface.RenderChat(std::move(messages));
     interface.DisplayAnnouncement("Logged as: " + user_data.login);
     interface.DisplayAnnouncement("Type exit to quit");
 

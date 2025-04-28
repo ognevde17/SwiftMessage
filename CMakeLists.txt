@@ -48,7 +48,7 @@ if (BUILD_CLIENT)
 #        src/client/connection_manager.cpp
 #        src/client/client.cpp
 #        src/client/interface.cpp
-        src/client/test.cpp
+        tests/screen_handler/test_interface.cpp
         src/screen_handler/interface.cpp
         src/screen_handler/sign_screen.cpp
         src/screen_handler/chat_screen.cpp

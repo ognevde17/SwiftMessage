@@ -38,9 +38,11 @@ class Interface {
 
   // Экран чата. Если есть аргумент (вектор с сообщениями), то он сразу их выведет
   // Если нет, то пустой чат
-//  template <typename... Args>
   void RenderChat();
+  void RenderChat(std::vector<Message>&& messages);
+  void RenderChat(const std::vector<Message>& messages);
   // Прогрузить вектор сообщений и обновить чат
+  void UpdateMessages(std::vector<Message>&& messages);
   void UpdateMessages(const std::vector<Message>& messages);
 
   void DisplayAnnouncement(const std::string& message);

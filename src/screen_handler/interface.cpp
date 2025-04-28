@@ -42,13 +42,24 @@ Result Interface::RenderAR() {
   return state;
 }
 
-//template <typename... Args>
 void Interface::RenderChat() {
   chat_screen_ = new ChatScreen();
   chat_screen_->update_username(user_data_.login);  //TODO(Sheyme): потом сюда юзернейм кидать, а не логин
-//  if constexpr (sizeof... (messages) > 0) {
-//    chat_screen_->update_messages(std::forward<Args>(messages)...);
-//  }
+  chat_screen_->refresh();
+}
+
+void Interface::RenderChat(std::vector<Message>&& messages) {
+  RenderChat();
+  UpdateMessages(std::move(messages));
+}
+
+void Interface::RenderChat(const std::vector<Message>& messages) {
+  RenderChat();
+  UpdateMessages(messages);
+}
+
+void Interface::UpdateMessages(std::vector<Message>&& messages) {
+  chat_screen_->update_messages(std::forward<std::vector<Message>>(messages));
   chat_screen_->refresh();
 }
 
