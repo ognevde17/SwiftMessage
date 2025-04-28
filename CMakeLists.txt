@@ -9,7 +9,7 @@ set(CLIENT_NAME ${PROJECT_NAME}_Client)
 set(DB_TEST_NAME ${PROJECT_NAME}_DbTest)
 
 # Дефолтные значения тех, кого мы будем собирать
-option(BUILD_CLIENT "Build SwiftMessage client"    ON)
+option(BUILD_CLIENT "Build SwiftMessage client"    OFF)
 option(BUILD_SERVER "Build SwiftMessage server"    ON)
 option(BUILD_DB_TEST "Build database tests"        OFF)
 
@@ -18,10 +18,10 @@ find_package(Curses REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
-#if (BUILD_SERVER OR BUILD_DB_TEST)
-#  find_package(PostgreSQL REQUIRED)
-#  find_library(PQXX_LIB pqxx)
-#endif()
+if (BUILD_SERVER OR BUILD_DB_TEST)
+  find_package(PostgreSQL REQUIRED)
+  find_library(PQXX_LIB pqxx)
+endif()
 
 if (BUILD_SERVER)
     add_executable(${SERVER_NAME}
