@@ -94,14 +94,12 @@ std::string Interface::GetInputMessage() {
 void Interface::ClearChat() { chat_screen_->clear_chat(); }
 
 Interface::~Interface() {
-  if (chat_screen_ != nullptr) {
-    delete chat_screen_;
-  }
+  delete chat_screen_;
   endwin();
 }
 
 void Interface::init_ncurses() {
-  if (!ncurses_initialized_) {
+  if (!ncurses_initialized) {
     initscr();
     cbreak();
     noecho();
@@ -110,7 +108,7 @@ void Interface::init_ncurses() {
       start_color();
       use_default_colors();
     }
-    ncurses_initialized_ = true;
+    ncurses_initialized = true;
   }
 }
 

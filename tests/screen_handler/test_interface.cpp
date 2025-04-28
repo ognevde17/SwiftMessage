@@ -7,7 +7,7 @@
 #include "../../include/screen_handler/interface.hpp"
 #include "utils.hpp"
 
-bool Interface::ncurses_initialized_ = false;
+bool Interface::ncurses_initialized = false;
 
 int main() {
   try {
@@ -29,6 +29,13 @@ int main() {
         interface.DisplayAnnouncement("Disconnecting..");
         break;
       }
+      if (user_input == "clear") {
+        interface.ClearChat();
+      }
+      if (user_input == "random") {
+        messages = utils::GenerateRandomMessages(testing_data::kMessagesCount);
+        interface.UpdateMessages(messages);
+      }
       if (user_input == "error") {
         interface.DisplayError("Testing error");
       } else {
@@ -36,8 +43,7 @@ int main() {
       }
     }
   }
-  catch (std::exception& e)
-  {
+  catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
   }
 }

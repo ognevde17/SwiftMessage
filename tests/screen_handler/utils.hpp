@@ -43,6 +43,6 @@ std::vector<Message> GenerateRandomMessages(size_t count) {
   }
   return vector;
 }
-}
+}  // namespace utils
 
 #endif  // SWIFTMESSAGE_TESTS_SCREEN_HANDLER_UTILS_HPP_

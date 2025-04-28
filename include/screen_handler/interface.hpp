@@ -46,7 +46,7 @@ class Interface {
   void UpdateMessages(const std::vector<Message>& messages);
 
   void DisplayAnnouncement(const std::string& message);
-  void DisplayError(const std::string& message); // TODO(Sheyme): выделять цветом эти объявления, отправителя тоже
+  void DisplayError(const std::string& message);
   void DisplayMessage(const std::string& sender, const std::string& message);
 
   std::string GetSenderLogin();  // TODO(Sheyme): потом сделаю
@@ -63,7 +63,7 @@ class Interface {
 
   UserData user_data_;
   ChatScreen* chat_screen_{nullptr};
-  static bool ncurses_initialized_;
+  static bool ncurses_initialized;
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_INTERFACE_HPP_
