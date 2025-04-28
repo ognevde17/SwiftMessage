@@ -35,18 +35,23 @@ jobs:
         chmod +x scripts/create_server.sh
     
     - name: Запуск скрипта, который собирает клиента
-      run: ./scripts/create_client.sh
+      run: |
+        ./scripts/create_client.sh
+        echo "✅ Скрипт для сборки клиента выполнен успешно!" 
+
     
     - name: Запуск скрипта, который собирает сервер
-      run: ./scripts/create_server.sh
+      run: |
+        ./scripts/create_server.sh
+        echo "✅ Скрипт для сборки сервера выполнен успешно!"
     
       
     - name: Проверяем, что сборка прошла успешно
       run: |
         if [[ -x build-client/SwiftMessage_Client && -x build-server/SwiftMessage_Server ]]; then
-          echo "✅ Всё чики-пуки!"
+          echo "Сервер и клиент собраны успешно!"
         else
-          echo "❌ Что-то пошло не так("
+          echo "Сервер и клиент не собраны"
           exit 1
         fi
     
