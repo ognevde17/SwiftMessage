@@ -15,7 +15,7 @@ set(INTERFACE_TEST_NAME ${PROJECT_NAME}_InterfaceTest)
 #option(BUILD_DB_TEST "Build database tests"        OFF)
 #option(BUILD_INTERFACE_TEST "Build interface test" ON)
 
-find_package(Boost REQUIRED COMPONENTS system thread serialization)
+find_package(Boost REQUIRED CONFIG COMPONENTS system thread serialization)
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 

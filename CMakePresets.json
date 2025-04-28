@@ -4,7 +4,7 @@
     {
       "name": "dev-interface",
       "displayName": "Development Build",
-      "description": "Build a interface test",
+      "description": "Build an interface test",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
