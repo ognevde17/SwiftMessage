@@ -63,6 +63,7 @@ void RequestManager::HandleAuthRequest(DatabaseManager& database_manager,
   }
 
   int user_id = database_manager.GetClientIdByLogin(auth_request.login);
+  std::cout << "ABOBA_USER_ID: " << user_id << std::endl;
   AssociateUserIdWithConnectionId(user_id, connection_id);
 
   ConnectionManager::SendData(connection_id,
