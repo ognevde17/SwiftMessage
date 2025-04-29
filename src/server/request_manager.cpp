@@ -11,8 +11,6 @@ RequestManager::RequestManager()
 void RequestManager::AssociateUserIdWithConnectionId(const int user_id,
                                                      const int connection_id) {
   std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
-  std::cout << "Associating user_id: " << user_id
-            << " with connection_id: " << connection_id << std::endl;
   user_id_to_connection_id_.emplace(user_id, connection_id);
 }
 
@@ -20,11 +18,8 @@ int RequestManager::GetConnectionIdByUserId(const int user_id) {
   int result;
   {
     std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
-    std::cout << "GOIDA1" << std::endl;
     result = user_id_to_connection_id_.at(user_id);
-    std::cout << "GOIDA2" << std::endl;
   }
-  std::cout << "GetConnectionIdByUserId: " << result << std::endl;
   return result;
 }
 
@@ -54,8 +49,6 @@ void RequestManager::HandleAuthRequest(DatabaseManager& database_manager,
 
   if (!database_manager.IsClientCorrectLoginAndPassword(
           auth_request.login, auth_request.password)) {
-    std::cout << "AUTH_REQUEST_ERROR: " << auth_request.login << " "
-              << auth_request.password << std::endl;
     ConnectionManager::SendData(
         connection_id,
         ServerResponse("This login or password is incorrect").to_string());
@@ -63,7 +56,6 @@ void RequestManager::HandleAuthRequest(DatabaseManager& database_manager,
   }
 
   int user_id = database_manager.GetClientIdByLogin(auth_request.login);
-  std::cout << "ABOBA_USER_ID: " << user_id << std::endl;
   AssociateUserIdWithConnectionId(user_id, connection_id);
 
   ConnectionManager::SendData(connection_id,
@@ -83,29 +75,12 @@ void RequestManager::HandleSendMessageRequest(DatabaseManager& database_manager,
     return;
   }
 
-  std::cout << "Message: " << send_message_request.message_text << std::endl;
-  std::cout << "Recipient: " << send_message_request.recipient_login
-            << std::endl;
-
-  std::cout << "GetClientIdByLogin: "
-            << database_manager.GetClientIdByLogin(
-                   send_message_request.recipient_login)
-            << std::endl;
-
   int recipient_connection_id;
   {
     std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
-    std::cout << "ZOV1" << std::endl;
-    std::cout << "recipient_login: " << send_message_request.recipient_login
-              << std::endl;
-    std::cout << "CLIENT_ID: "
-              << database_manager.GetClientIdByLogin(
-                     send_message_request.recipient_login)
-              << std::endl;
     recipient_connection_id =
         user_id_to_connection_id_.at(database_manager.GetClientIdByLogin(
             send_message_request.recipient_login));
-    std::cout << "ZOV2" << std::endl;
   }
   ConnectionManager::SendData(recipient_connection_id,
                               send_message_request.to_string());
