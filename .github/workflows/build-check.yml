@@ -17,7 +17,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y g++-10 cmake
-        sudo apt-get install -y libboost-system-dev libboost-thread-dev libboost-serialization-dev libpqxx-dev postgresql
+        sudo apt-get install -y libboost-system-dev libboost-thread-dev libboost-serialization-dev libpqxx-dev postgresql Cmake
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
     
@@ -50,3 +50,10 @@ jobs:
           exit 1
         fi
     
+    - name: Запуск интеграционного теста
+      run: |
+        cd integration_tests
+        mkdir -p build && cd build
+        cmake ..
+        make
+        ./full_scenario_test

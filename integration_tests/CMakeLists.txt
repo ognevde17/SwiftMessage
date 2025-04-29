@@ -33,6 +33,20 @@ if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
 
+# ── сервер ─────────────────────────────────────────────
+set(SERVER_SOURCES
+    ${PROJECT_ROOT_DIR}/src/server/server.cpp
+    ${PROJECT_ROOT_DIR}/src/server/connection_manager.cpp
+    ${PROJECT_ROOT_DIR}/src/server/database_manager.cpp
+    ${PROJECT_ROOT_DIR}/src/server/request_manager.cpp
+)
+
+# ── клиент ─────────────────────────────────────────────
+set(CLIENT_SOURCES
+    ${PROJECT_ROOT_DIR}/src/client/client.cpp
+    ${PROJECT_ROOT_DIR}/src/client/connection_manager.cpp
+)
+
 # Находим нужные пакеты
 find_package(Boost REQUIRED COMPONENTS system thread serialization)
 find_package(PostgreSQL REQUIRED)
