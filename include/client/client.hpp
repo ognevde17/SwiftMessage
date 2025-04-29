@@ -4,7 +4,10 @@
 
 #include "connection_manager.hpp"
 
+class ClientThread;
+
 class Client {
+  friend class ClientThread;
  public:
   Client(const std::string& server_ip, const std::string& server_port);
 

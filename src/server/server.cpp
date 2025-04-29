@@ -21,6 +21,10 @@ void Server::Run() {
   }
 }
 
+void Server::Stop() {
+  io_context_.stop();
+}
+
 void Server::Session(const int connection_id) {
   while (true) {
     std::string request = connection_manager_.ReceiveData(connection_id);

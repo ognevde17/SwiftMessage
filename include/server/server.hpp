@@ -17,13 +17,17 @@
 #include "database_manager.hpp"
 #include "request_manager.hpp"
 
+class ServerThread;
+
 class Server {
+  friend class ServerThread;
  public:
   static Server& GetInstance();
 
   void Run();
 
-
+  void Stop();
+  
   Server(const Server&) = delete;
   Server& operator=(const Server&) = delete;
 
