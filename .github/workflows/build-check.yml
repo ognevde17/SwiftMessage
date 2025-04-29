@@ -56,4 +56,4 @@ jobs:
         mkdir -p build && cd build
         cmake ..
         make
-        ./full_scenario_test
+        ./SwiftMessage_Tests
