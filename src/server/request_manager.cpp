@@ -17,8 +17,15 @@ void RequestManager::AssociateUserIdWithConnectionId(const int user_id,
 }
 
 int RequestManager::GetConnectionIdByUserId(const int user_id) {
-  std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
-  return user_id_to_connection_id_.at(user_id);
+  int result;
+  {
+    std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
+    std::cout << "GOIDA1" << std::endl;
+    result = user_id_to_connection_id_.at(user_id);
+    std::cout << "GOIDA2" << std::endl;
+  }
+  std::cout << "GetConnectionIdByUserId: " << result << std::endl;
+  return result;
 }
 
 void RequestManager::HandleRegisterRequest(DatabaseManager& database_manager,
@@ -87,9 +94,11 @@ void RequestManager::HandleSendMessageRequest(DatabaseManager& database_manager,
   int recipient_connection_id;
   {
     std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
+    std::cout << "ZOV1" << std::endl;
     recipient_connection_id =
         user_id_to_connection_id_.at(database_manager.GetClientIdByLogin(
             send_message_request.recipient_login));
+    std::cout << "ZOV2" << std::endl;
   }
   ConnectionManager::SendData(recipient_connection_id,
                               send_message_request.to_string());
