@@ -17,7 +17,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y g++-10 cmake
-        sudo apt-get install -y libboost-system-dev libboost-thread-dev libboost-serialization-dev libpqxx-dev postgresql Cmake
+        sudo apt-get install -y libboost-system-dev libboost-thread-dev libboost-serialization-dev libpqxx-dev postgresql cmake
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
     
