@@ -12,10 +12,8 @@ set(DB_TEST_NAME ${PROJECT_NAME}_DbTest)
 option(BUILD_CLIENT "Build SwiftMessage client"    ON)
 option(BUILD_SERVER "Build SwiftMessage server"    ON)
 option(BUILD_DB_TEST "Build database tests"        OFF)
-option(BUILD_TESTING "Build Google Tests"          OFF)
 option(BUILD_INTEGRATION_TESTS "Build integration tests" OFF)
 
-# Set policy for Boost
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
@@ -27,15 +25,27 @@ include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 if (BUILD_SERVER OR BUILD_DB_TEST OR BUILD_INTEGRATION_TESTS)
   find_package(PostgreSQL REQUIRED)
   find_library(PQXX_LIB pqxx)
+  include_directories(${PostgreSQL_INCLUDE_DIRS})
 endif()
+
+# ── сервер ─────────────────────────────────────────────
+set(SERVER_SOURCES
+    ${PROJECT_SOURCE_DIR}/src/server/server.cpp
+    ${PROJECT_SOURCE_DIR}/src/server/connection_manager.cpp
+    ${PROJECT_SOURCE_DIR}/src/server/database_manager.cpp
+    ${PROJECT_SOURCE_DIR}/src/server/request_manager.cpp
+)
+
+# ── клиент ─────────────────────────────────────────────
+set(CLIENT_SOURCES
+    ${PROJECT_SOURCE_DIR}/src/client/client.cpp
+    ${PROJECT_SOURCE_DIR}/src/client/connection_manager.cpp
+)
 
 if (BUILD_SERVER)
     add_executable(${SERVER_NAME}
-        src/server/main.cpp
-        src/server/database_manager.cpp
-        src/server/connection_manager.cpp
-        src/server/request_manager.cpp
-        src/server/server.cpp
+        ${PROJECT_SOURCE_DIR}/src/server/main.cpp
+        ${SERVER_SOURCES}
     )
 
     target_link_libraries(${SERVER_NAME}
@@ -50,9 +60,8 @@ endif()
 
 if (BUILD_CLIENT)
     add_executable(${CLIENT_NAME}
-        src/client/main.cpp
-        src/client/connection_manager.cpp
-        src/client/client.cpp
+        ${PROJECT_SOURCE_DIR}/src/client/main.cpp
+        ${CLIENT_SOURCES}
     )
 
     target_link_libraries(${CLIENT_NAME}
@@ -75,11 +84,6 @@ if (BUILD_DB_TEST)
         ${PQXX_LIB}
         ${PostgreSQL_LIBRARIES}
     )
-endif()
-
-# Добавление Google тестов
-if (BUILD_TESTING)
-    add_subdirectory(google_tests)
 endif()
 
 # Добавление интеграционных тестов

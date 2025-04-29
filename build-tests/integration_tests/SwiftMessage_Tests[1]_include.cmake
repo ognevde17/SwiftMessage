@@ -1,0 +1,5 @@
+if(EXISTS "/Users/viktor/MIPT/Projects/SwiftMessage/SwiftMessage/build-tests/integration_tests/SwiftMessage_Tests[1]_tests.cmake")
+  include("/Users/viktor/MIPT/Projects/SwiftMessage/SwiftMessage/build-tests/integration_tests/SwiftMessage_Tests[1]_tests.cmake")
+else()
+  add_test(SwiftMessage_Tests_NOT_BUILT SwiftMessage_Tests_NOT_BUILT)
+endif()
