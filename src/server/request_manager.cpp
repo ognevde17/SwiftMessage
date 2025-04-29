@@ -95,6 +95,8 @@ void RequestManager::HandleSendMessageRequest(DatabaseManager& database_manager,
   {
     std::lock_guard<std::mutex> lock(user_id_to_connection_id_mutex_);
     std::cout << "ZOV1" << std::endl;
+    std::cout << "recipient_login: " << send_message_request.recipient_login
+              << std::endl;
     recipient_connection_id =
         user_id_to_connection_id_.at(database_manager.GetClientIdByLogin(
             send_message_request.recipient_login));
