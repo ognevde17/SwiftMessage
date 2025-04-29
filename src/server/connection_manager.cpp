@@ -30,10 +30,8 @@ void ConnectionManager::CloseConnection(tcp::socket& socket) { socket.close(); }
 std::string ConnectionManager::ReceiveData(int connection_id) {
   std::unique_lock<std::mutex> lk(connection_id_to_socket_mutex_);
 
-  std::cout << "OK1" << std::endl;
   auto& sock = connection_id_to_socket_.at(connection_id);
-  std::cout << "OK2" << std::endl;
-  
+
   lk.unlock();
 
   return ReceiveData(sock);
@@ -58,8 +56,10 @@ std::string ConnectionManager::ReceiveData(tcp::socket& socket) {
 bool ConnectionManager::SendData(int connection_id, const std::string& data) {
   std::unique_lock<std::mutex> lk(connection_id_to_socket_mutex_);
 
+  std::cout << "OK1" << std::endl;
   auto& sock = connection_id_to_socket_.at(connection_id);
-
+  std::cout << "OK2" << std::endl;
+  
   lk.unlock();
 
   return SendData(sock, data);
