@@ -1,70 +1,144 @@
-name: C++ Build Check
+# name: C++ Build Check
+
+# on:
+#   push:
+    
+#   pull_request:
+#     branches: [ main, master ]
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#     - uses: actions/checkout@v3
+    
+#     - name: Установка зависимостей
+#       run: |
+#         sudo apt-get update
+#         sudo apt-get install -y g++-10 cmake
+#         sudo apt-get install -y libboost-system-dev libboost-thread-dev libboost-serialization-dev libpqxx-dev postgresql cmake
+#         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+#         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+    
+#     - name: Проверяем, что C++20 поддерживается
+#       run: |
+#         g++ --version
+#         echo '#include <concepts>' > test.cpp
+#         echo 'int main() { return 0; }' >> test.cpp
+#         g++ -std=c++20 test.cpp -o test && ./test
+#         echo "✅ C++20 поддерживается!"
+    
+#     - name: Делаем скрипт исполняемым
+#       run: |
+#         chmod +x scripts/create_client.sh
+#         chmod +x scripts/create_server.sh
+    
+#     - name: Запуск скрипта, который собирает клиента
+#       run: ./scripts/create_client.sh
+    
+#     - name: Запуск скрипта, который собирает сервер
+#       run: ./scripts/create_server.sh
+
+#     - name: Поднимаем базу данных
+#       run: |
+#         sudo systemctl start postgresql.service
+#         sudo -i -u postgres
+#         psql
+#         CREATE USER swiftmessageadmin WITH PASSWORD 'SwiftMessagePassword';
+#         \q
+#         createdb swiftmessagedatabase
+#         psql
+#         GRANT ALL PRIVILEGES ON DATABASE swiftmessagedatabase TO swiftmessageadmin;
+#         \q
+
+#     - name: Проверяем, что сборка прошла успешно
+#       run: |
+#         if [[ -x build-client/SwiftMessage_Client && -x build-server/SwiftMessage_Server ]]; then
+#           echo "✅ Всё чики-пуки!"
+#         else
+#           echo "❌ Что-то пошло не так("
+#           exit 1
+#         fi
+    
+#     - name: Запуск интеграционного теста
+#       run: |
+#         cd integration_tests
+#         mkdir -p build && cd build
+#         cmake ..
+#         make
+#         ./SwiftMessage_Tests
+
+# .github/workflows/ci.yml
+# ------------------------------------------------------------
+#  CI-пайплайн: сборка проекта C++20 + Boost + libpqxx
+#  и интеграционные Google-тесты с настоящим PostgreSQL,
+#  поднятым через секцию `services`.
+# ------------------------------------------------------------
+name: C++ Build & Tests
 
 on:
   push:
-    
+
   pull_request:
     branches: [ main, master ]
 
 jobs:
-  build:
+  build-test:
     runs-on: ubuntu-latest
-    
+
+    # ─────────────────────────────────────────────────────────
+    #  PostgreSQL 16 как side-container
+    # ─────────────────────────────────────────────────────────
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: swiftmessagedatabase
+          POSTGRES_USER: swiftmessageadmin
+          POSTGRES_PASSWORD: SwiftMessagePassword
+        ports: [ '5432:5432' ]
+        options: >-
+          --health-cmd "pg_isready -U swiftmessageadmin -d swiftmessagedatabase"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Установка зависимостей
+    # ── 1. исходники ────────────────────────────────────────
+    - name: Checkout sources
+      uses: actions/checkout@v4
+
+    # ── 2. системные зависимости ────────────────────────────
+    - name: Install toolchain & libs
       run: |
         sudo apt-get update
-        sudo apt-get install -y g++-10 cmake
-        sudo apt-get install -y libboost-system-dev libboost-thread-dev libboost-serialization-dev libpqxx-dev postgresql cmake
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
-    
-    - name: Проверяем, что C++20 поддерживается
-      run: |
-        g++ --version
-        echo '#include <concepts>' > test.cpp
-        echo 'int main() { return 0; }' >> test.cpp
-        g++ -std=c++20 test.cpp -o test && ./test
-        echo "✅ C++20 поддерживается!"
-    
-    - name: Делаем скрипт исполняемым
-      run: |
-        chmod +x scripts/create_client.sh
-        chmod +x scripts/create_server.sh
-    
-    - name: Запуск скрипта, который собирает клиента
-      run: ./scripts/create_client.sh
-    
-    - name: Запуск скрипта, который собирает сервер
-      run: ./scripts/create_server.sh
+        sudo apt-get install -y \
+          ninja-build cmake g++-12 clang \
+          libboost-system-dev libboost-thread-dev libboost-serialization-dev \
+          libpqxx-dev
+        # делаем g++-12 компилятором «по умолчанию»
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100
 
-    - name: Поднимаем базу данных
+    # ── 3. конфигурация CMake ───────────────────────────────
+    - name: Configure CMake
       run: |
-        sudo systemctl start postgresql.service
-        sudo -i -u postgres
-        psql
-        CREATE USER swiftmessageadmin WITH PASSWORD 'SwiftMessagePassword';
-        \q
-        createdb swiftmessagedatabase
-        psql
-        GRANT ALL PRIVILEGES ON DATABASE swiftmessagedatabase TO swiftmessageadmin;
-        \q
+        cmake -S . -B build -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_TESTING=ON
 
-    - name: Проверяем, что сборка прошла успешно
+    # ── 4. сборка ───────────────────────────────────────────
+    - name: Build
+      run: cmake --build build --parallel
+
+    # ── 5. запуск Google-тестов ─────────────────────────────
+    - name: Run tests
+      env:                             # → доступ к БД из тестов
+        PGHOST: localhost
+        PGUSER: swiftmessageadmin
+        PGPASSWORD: SwiftMessagePassword
+        PGDATABASE: swiftmessagedatabase
       run: |
-        if [[ -x build-client/SwiftMessage_Client && -x build-server/SwiftMessage_Server ]]; then
-          echo "✅ Всё чики-пуки!"
-        else
-          echo "❌ Что-то пошло не так("
-          exit 1
-        fi
-    
-    - name: Запуск интеграционного теста
-      run: |
-        cd integration_tests
-        mkdir -p build && cd build
-        cmake ..
-        make
-        ./SwiftMessage_Tests
+        cd build
+        ctest --output-on-failure -j "$(nproc)"
