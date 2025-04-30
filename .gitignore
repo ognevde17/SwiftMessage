@@ -1,9 +1,10 @@
-.vscode/*
 
-build/*
+build/
+build-client/
+build-server/
+cmake-build-debug/
 
-build-client/*
-
-build-server/*
+.vscode/
+.idea/
 
 .DS_Store

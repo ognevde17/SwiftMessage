@@ -7,13 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SERVER_NAME ${PROJECT_NAME}_Server)
 set(CLIENT_NAME ${PROJECT_NAME}_Client)
 set(DB_TEST_NAME ${PROJECT_NAME}_DbTest)
+set(INTERFACE_TEST_NAME ${PROJECT_NAME}_InterfaceTest)
 
-# Дефолтные значения тех, кого мы будем собирать
-option(BUILD_CLIENT "Build SwiftMessage client"    ON)
-option(BUILD_SERVER "Build SwiftMessage server"    ON)
-option(BUILD_DB_TEST "Build database tests"        OFF)
-
-find_package(Boost REQUIRED COMPONENTS system thread serialization)
+find_package(Boost REQUIRED CONFIG COMPONENTS system thread serialization)
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
@@ -21,6 +17,10 @@ if (BUILD_SERVER OR BUILD_DB_TEST)
   find_package(PostgreSQL REQUIRED)
   find_library(PQXX_LIB pqxx)
 endif()
+
+if (BUILD_INTERFACE_TEST)
+    find_package(Curses REQUIRED)
+endif ()
 
 if (BUILD_SERVER)
     add_executable(${SERVER_NAME}
@@ -70,3 +70,19 @@ if (BUILD_DB_TEST)
         ${PostgreSQL_LIBRARIES}
     )
 endif()
+
+if (BUILD_INTERFACE_TEST)
+    add_executable(${INTERFACE_TEST_NAME}
+        tests/screen_handler/test_interface.cpp
+        src/screen_handler/interface.cpp
+        src/screen_handler/sign_screen.cpp
+        src/screen_handler/chat_screen.cpp
+        src/screen_handler/greeting_screen.cpp
+        src/screen_handler/abstract_screen.cpp
+    )
+
+    target_link_libraries(${INTERFACE_TEST_NAME}
+        PRIVATE
+        ${CURSES_LIBRARIES}
+    )
+endif ()
