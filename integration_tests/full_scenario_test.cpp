@@ -47,16 +47,16 @@ class ServerThread {
   std::atomic<bool> running_;
 };
 
-// TEST(ServerTest, InitializeServer) {
-//   ServerThread server_thread;
-//   server_thread.Start();
+TEST(FullScenarioTest1, FullScenario) {
+  ServerThread server_thread;
+  server_thread.Start();
 
-//   std::this_thread::sleep_for(std::chrono::seconds(100));
+  std::this_thread::sleep_for(std::chrono::seconds(100));
 
-//   server_thread.Stop();
-// }
+  server_thread.Stop();
+}
 
-TEST(FullScenarioTest2, FullScenario) { EXPECT_TRUE(2 == 2); }
+TEST(TrivialTest, Trivial) { EXPECT_TRUE(2 == 2); }
 
 // Точка входа для GTest
 int main(int argc, char** argv) {
