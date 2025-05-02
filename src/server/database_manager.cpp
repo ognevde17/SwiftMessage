@@ -2,11 +2,12 @@
 #include "../../include/common/user.hpp"
 
 DatabaseManager::DatabaseManager(const std::string& connection_string) {
-    try {
-        db_connection = std::make_unique<pqxx::connection>(connection_string);
-    } catch (const std::exception& e) {
-        throw std::runtime_error("Failed to connect to database: " + std::string(e.what()));
-    }
+    // TODO: remove this
+    // try {
+    //     db_connection = std::make_unique<pqxx::connection>(connection_string);
+    // } catch (const std::exception& e) {
+    //     throw std::runtime_error("Failed to connect to database: " + std::string(e.what()));
+    // }
 }
 
 DatabaseManager::~DatabaseManager() {

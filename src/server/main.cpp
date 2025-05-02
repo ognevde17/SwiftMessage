@@ -15,7 +15,17 @@
 int main() {
   Server& server = Server::GetInstance();
 
-  server.Run();
+  auto thread_func = [&server]() {
+    server.Run();
+    std::cout << "Server is running" << std::endl;
+  };
 
+  std::thread server_thread(thread_func);
+
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+
+  server.Stop();
+  server_thread.join();
+  std::cout << "Server is stopped" << std::endl;
   return 0;
 }

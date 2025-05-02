@@ -37,6 +37,7 @@ class Server {
 
   void Session(int user_id);
 
+  std::atomic<bool> is_running_{false};
   boost::asio::io_context io_context_;
   ConnectionManager connection_manager_;
   DatabaseManager database_manager_;

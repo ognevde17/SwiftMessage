@@ -16,20 +16,25 @@ using boost::asio::ip::tcp;
 
 class ConnectionManager {
  public:
-  ConnectionManager();
+  using AcceptHandler = std::function<void(int)>;
 
-  int AcceptNewClient();
+  ConnectionManager(boost::asio::io_context& io_context);
+
+  void SetAcceptHandler(AcceptHandler accept_handler);
+
+  void StartAcceptingClients();
 
   std::string ReceiveData(int connection_id);
 
   static bool SendData(int connection_id, const std::string& data);
 
+  void CloseAcceptor();
  private:
   // Методы:
 
-  int GenerateConnectionId();
+  void PrivateAcceptNewClient();
 
-  void CloseConnection(tcp::socket& socket);
+  int GenerateConnectionId();
 
   void AssociateConnectionIdWithSocket(int connection_id, tcp::socket socket);
   void AssociateLoginWithConnectionId(const std::string& login, int connection_id);
@@ -43,11 +48,13 @@ class ConnectionManager {
 
   // Поля:
 
-  boost::asio::io_context io;
+  boost::asio::io_context& io_context_;
 
   tcp::acceptor acceptor_;
 
-  std::atomic<int> connection_id_counter_{1};
+  AcceptHandler accept_handler_;
 
-  static std::unordered_map<int, tcp::socket> connection_id_to_socket_;
+  std::atomic<int> connection_id_counter_{1}; // TODO: разве это не должно быть 0?
+
+  static std::unordered_map<int, tcp::socket> connection_id_to_socket_; // TODO: убрать static???
 };
