@@ -56,6 +56,11 @@ TEST(FullScenarioTest1, FullScenario) {
   server_thread.Stop();
 }
 
+// TODO:
+// Test: client initializes correctly
+// Test: client correctly connects to server
+// Test: 2 clients connect to the same server and client1 sends message to client2
+
 TEST(TrivialTest, Trivial) { EXPECT_TRUE(2 == 2); }
 
 // Точка входа для GTest
