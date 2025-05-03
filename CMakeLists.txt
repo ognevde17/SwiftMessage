@@ -40,6 +40,7 @@ set(SERVER_SOURCES
 set(CLIENT_SOURCES
     ${PROJECT_SOURCE_DIR}/src/client/client.cpp
     ${PROJECT_SOURCE_DIR}/src/client/connection_manager.cpp
+    ${PROJECT_SOURCE_DIR}/src/client/interface.cpp
 )
 
 if (BUILD_SERVER)
