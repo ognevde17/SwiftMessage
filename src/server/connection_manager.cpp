@@ -5,25 +5,56 @@ std::mutex ConnectionManager::connection_id_to_socket_mutex_;
 std::unordered_map<int, tcp::socket>
     ConnectionManager::connection_id_to_socket_;
 
-ConnectionManager::ConnectionManager()
-    : acceptor_(io, tcp::endpoint(boost::asio::ip::make_address("0.0.0.0"),
-                                  Constants::SERVER_PORT_UNSIGNED_SHORT)) {}
+ConnectionManager::ConnectionManager(boost::asio::io_context& io_context)
+    : io_context_(io_context),
+      acceptor_(io_context_,
+                tcp::endpoint(boost::asio::ip::make_address("0.0.0.0"),
+                              Constants::SERVER_PORT_UNSIGNED_SHORT)) {}
 
-int ConnectionManager::AcceptNewClient() {
-  tcp::socket socket = acceptor_.accept();
-
-  int connection_id = GenerateConnectionId();
-
-  AssociateConnectionIdWithSocket(connection_id, std::move(socket));
-
-  return connection_id;
+void ConnectionManager::SetAcceptHandler(AcceptHandler accept_handler) {
+  accept_handler_ = std::move(accept_handler);
 }
+
+void ConnectionManager::StartAcceptingClients() { PrivateAcceptNewClient(); }
+
+void ConnectionManager::PrivateAcceptNewClient() {
+  auto sock = std::make_shared<tcp::socket>(io_context_);
+  acceptor_.async_accept(*sock,
+    [this, sock](const boost::system::error_code& ec) {
+      if (!ec) {
+        int id = connection_id_counter_.fetch_add(1);
+        AssociateConnectionIdWithSocket(id, std::move(*sock));
+        if (accept_handler_) 
+          accept_handler_(id);
+      }
+      // Если акцептор ещё открыт — ждём следующего
+      if (acceptor_.is_open()) {
+        PrivateAcceptNewClient();
+      }
+    }
+  );
+}
+
+// int ConnectionManager::AcceptNewClient() {
+//   std::cout << "Accepting new client via acceptor" << std::endl;
+//   tcp::socket socket = acceptor_.accept();
+
+//   std::cout << "New client connected" << std::endl;
+
+//   int connection_id = GenerateConnectionId();
+
+//   std::cout << "OK1" << std::endl;
+
+//   AssociateConnectionIdWithSocket(connection_id, std::move(socket));
+
+//   std::cout << "OK2" << std::endl;
+
+//   return connection_id;
+// }
 
 int ConnectionManager::GenerateConnectionId() {
   return connection_id_counter_.fetch_add(1);
 }
-
-void ConnectionManager::CloseConnection(tcp::socket& socket) { socket.close(); }
 
 // Получение данных
 
@@ -73,6 +104,11 @@ bool ConnectionManager::SendData(tcp::socket& socket, const std::string& data) {
   }
 
   return true;
+}
+
+void ConnectionManager::CloseAcceptor() {
+  boost::system::error_code ec;
+  acceptor_.close(ec);
 }
 
 // Добавление и удаление ассоциаций

@@ -17,13 +17,17 @@
 #include "database_manager.hpp"
 #include "request_manager.hpp"
 
+class ServerThread;
+
 class Server {
+  friend class ServerThread;
  public:
   static Server& GetInstance();
 
   void Run();
 
-
+  void Stop();
+  
   Server(const Server&) = delete;
   Server& operator=(const Server&) = delete;
 
@@ -33,6 +37,7 @@ class Server {
 
   void Session(int user_id);
 
+  std::atomic<bool> is_running_{false};
   boost::asio::io_context io_context_;
   ConnectionManager connection_manager_;
   DatabaseManager database_manager_;
