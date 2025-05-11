@@ -4,7 +4,10 @@
 
 #include "../../include/screen_handler/sign_screen.hpp"
 
-SignScreen::SignScreen() : AbstractScreen() {
+#include <iostream>
+
+SignScreen::SignScreen(bool is_registration)
+    : AbstractScreen(), is_registration_(is_registration) {
   post_create();
   refresh();
 }
@@ -18,10 +21,27 @@ void SignScreen::refresh() {
   werase(content_win_);
   werase(main_win_);
   draw_borders();
+  if (!status_message_.empty()) {
+    draw_status();
+  }
   draw_fields();
   draw_switcher();
   draw_submit_button();
   AbstractScreen::refresh();
+}
+
+void SignScreen::switch_screen() {
+  is_registration_ = !is_registration_;
+  std::cout << 1;
+  clear_fields();
+  current_field_ = 0;
+  refresh();
+}
+
+void SignScreen::set_status(const std::string& message, ColorPairs color) {
+  status_message_ = std::string(message);
+  status_color_ = color;
+  refresh();
 }
 
 SignScreen::Result SignScreen::handle_input() {
@@ -90,11 +110,9 @@ void SignScreen::handle_char(int ch) {
 SignScreen::Result SignScreen::handle_submit() {
   if (current_field_ == (is_registration_ ? 4 : 3)) {
     return is_registration_ ? Result::Register : Result::Login;
-  } else if (current_field_ == (is_registration_ ? 3 : 2)) {
-    is_registration_ = !is_registration_;
-    current_field_ = 0;
-    clear_fields();
-    refresh();
+  }
+  if (current_field_ == (is_registration_ ? 3 : 2)) {
+    switch_screen();
   }
   return Result::None;
 }
@@ -132,6 +150,14 @@ void SignScreen::draw_borders() {
   apply_color(main_win_, ACTIVE_PAIR, true);
   box(main_win_, 0, 0);
   apply_color(main_win_, ACTIVE_PAIR, false);
+}
+
+void SignScreen::draw_status() {
+  int x = COLS / 2 - (static_cast<int>(status_message_.length()) / 2);
+  int y = LINES / 2 - (is_registration_ ? 3 : 2) - 5;
+  apply_color(content_win_, status_color_, true);
+  mvwprintw(content_win_, y, x, "%s", status_message_.c_str());
+  apply_color(content_win_, status_color_, false);
 }
 
 void SignScreen::draw_field(const std::string& label, const std::string& value,

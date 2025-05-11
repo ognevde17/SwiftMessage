@@ -16,11 +16,15 @@ class SignScreen : public AbstractScreen {
     Exit
   };
 
-  SignScreen();
+  SignScreen(bool is_registration = false);
 
   std::string get_username() const { return username_; }
   std::string get_login() const { return login_; }
   std::string get_password() const { return password_; }
+
+  void switch_screen();
+  void set_status(const std::string& message,
+                  ColorPairs color = SYSTEM_NOTIFICATION_PAIR);
 
   void refresh() override;
 
@@ -46,6 +50,8 @@ class SignScreen : public AbstractScreen {
 
   void draw_borders();
 
+  void draw_status();
+
   void draw_field(const std::string& label, const std::string& value,
                   int x, int y, int field_num);
 
@@ -59,6 +65,8 @@ class SignScreen : public AbstractScreen {
 
   bool is_registration_{false};
   int current_field_{0};
+  std::string status_message_;
+  ColorPairs status_color_{SYSTEM_NOTIFICATION_PAIR};
   std::string username_;
   std::string login_;
   std::string password_;

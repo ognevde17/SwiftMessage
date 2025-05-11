@@ -14,7 +14,18 @@ int main() {
     Interface interface;
 
     Interface::RenderGreeting();
-    interface.RenderAR();
+    Result state = Result::None;
+    while (true) {
+      state = interface.RenderAR();
+      if (state == Result::Register) {
+        interface.SetARScreenStatus("Registration achieved", ACTIVE_PAIR);
+        interface.SwitchARScreen();
+        continue;
+      }
+      if (state == Result::Login || state == Result::Exit) {
+        break;
+      }
+    }
     auto user_data = interface.GetUserData();
 
     auto messages = utils::GenerateRandomMessages(testing_data::kMessagesCount);

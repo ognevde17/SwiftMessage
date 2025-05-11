@@ -17,15 +17,17 @@ void Interface::RenderGreeting() {
   }
 }
 
-Result Interface::RenderAR() {
-  SignScreen sign_screen;
+Result Interface::RenderAR(bool is_registration) {
+  sign_screen_ = new SignScreen(is_registration);
   bool is_submitted = false;
   Result state;
   while (!is_submitted) {
-    state = sign_screen.handle_input();
+    state = sign_screen_->handle_input();
     switch (state) {
-      case Result::Login:  // TODO(Anyone): login logic
-      case Result::Register:  // TODO(Anyone): reg logic
+      case Result::Login:
+        is_submitted = true;
+        break;
+      case Result::Register:
         is_submitted = true;
         break;
       case Result::Exit:
@@ -34,12 +36,22 @@ Result Interface::RenderAR() {
       case Result::None:
         break;
     }
-    sign_screen.refresh();
+    sign_screen_->refresh();
   }
-  user_data_ = UserData{sign_screen.get_username(),
-                        sign_screen.get_login(),
-                        sign_screen.get_password()};
+  user_data_ = UserData{sign_screen_->get_username(),
+                        sign_screen_->get_login(),
+                        sign_screen_->get_password()};
   return state;
+}
+
+void Interface::SetARScreenStatus(const std::string& status, ColorPairs color) {
+  sign_screen_->set_status(status, color);
+  sign_screen_->refresh();
+}
+
+void Interface::SwitchARScreen() {
+  sign_screen_->switch_screen();
+  sign_screen_->set_status("Registration achieved", ACTIVE_PAIR);
 }
 
 void Interface::RenderChat() {
@@ -59,12 +71,17 @@ void Interface::RenderChat(const std::vector<Message>& messages) {
 }
 
 void Interface::UpdateMessages(std::vector<Message>&& messages) {
-  chat_screen_->update_messages(std::forward<std::vector<Message>>(messages));
+  chat_screen_->load_messages(std::forward<std::vector<Message>>(messages));
   chat_screen_->refresh();
 }
 
 void Interface::UpdateMessages(const std::vector<Message>& messages) {
-  chat_screen_->update_messages(messages);
+  chat_screen_->load_messages(messages);
+  chat_screen_->refresh();
+}
+
+void Interface::AddMessagesUpdate(const std::vector<Message>& messages) {
+  chat_screen_->add_messages_update(messages);
   chat_screen_->refresh();
 }
 
@@ -94,6 +111,7 @@ std::string Interface::GetInputMessage() {
 void Interface::ClearChat() { chat_screen_->clear_chat(); }
 
 Interface::~Interface() {
+  delete sign_screen_;
   delete chat_screen_;
   endwin();
 }
