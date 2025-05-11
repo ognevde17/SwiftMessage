@@ -1,13 +1,14 @@
+
 //
 // Created by sheyme on 24/04/25.
 //
 
 #include "../../include/screen_handler/sign_screen.hpp"
 
-#include <iostream>
-
-SignScreen::SignScreen(bool is_registration)
-    : AbstractScreen(), is_registration_(is_registration) {
+SignScreen::SignScreen(bool is_registration, const std::string& status,
+                       ColorPairs color)
+    : AbstractScreen(), is_registration_(is_registration),
+      status_message_(status), status_color_(color) {
   post_create();
   refresh();
 }
@@ -20,27 +21,21 @@ void SignScreen::post_create() {
 void SignScreen::refresh() {
   werase(content_win_);
   werase(main_win_);
+
   draw_borders();
-  if (!status_message_.empty()) {
-    draw_status();
-  }
+  draw_status();
   draw_fields();
   draw_switcher();
   draw_submit_button();
+
   AbstractScreen::refresh();
 }
 
 void SignScreen::switch_screen() {
   is_registration_ = !is_registration_;
-  std::cout << 1;
   clear_fields();
   current_field_ = 0;
-  refresh();
-}
-
-void SignScreen::set_status(const std::string& message, ColorPairs color) {
-  status_message_ = std::string(message);
-  status_color_ = color;
+  swap_status();
   refresh();
 }
 
@@ -51,11 +46,11 @@ SignScreen::Result SignScreen::handle_input() {
       handle_resize();
       return Result::None;
     }
-    case KEY_UP: {
+    case (KEY_UP): {
       move_cursor(-1);
       return Result::None;
     }
-    case KEY_DOWN: {
+    case (KEY_DOWN): {
       move_cursor(1);
       return Result::None;
     }
@@ -94,14 +89,14 @@ void SignScreen::handle_char(int ch) {
     return;
   }
   std::string* field = get_current_field();
-  if (!field) {
+  if (field == nullptr) {
     return;
   }
   if (ch == KEY_BACKSPACE || ch == 127) {
     if (!field->empty()) {
       field->pop_back();
     }
-  } else if (isprint(ch)) {
+  } else if (isprint(ch) != 0) {
     *field += static_cast<char>(ch);
   }
   refresh();
@@ -152,9 +147,23 @@ void SignScreen::draw_borders() {
   apply_color(main_win_, ACTIVE_PAIR, false);
 }
 
+void SignScreen::swap_status() {
+  if (status_color_ != ACTIVE_PAIR) {
+    status_color_ = ACTIVE_PAIR;
+  }
+  if (is_registration_) {
+    status_message_ = "Registration";
+  } else {
+    status_message_ = "Authentication";
+  }
+}
+
 void SignScreen::draw_status() {
-  int x = COLS / 2 - (static_cast<int>(status_message_.length()) / 2);
-  int y = LINES / 2 - (is_registration_ ? 3 : 2) - 5;
+  if (status_message_.empty()) {
+    return;
+  }
+  int x = (COLS - static_cast<int>(status_message_.length())) / 2;
+  int y = (LINES / 2) - (is_registration_ ? 3 : 2) - 5;
   apply_color(content_win_, status_color_, true);
   mvwprintw(content_win_, y, x, "%s", status_message_.c_str());
   apply_color(content_win_, status_color_, false);
@@ -171,8 +180,8 @@ void SignScreen::draw_field(const std::string& label, const std::string& value,
 }
 
 void SignScreen::draw_fields() {
-  int x = COLS / 2 - 15;
-  int y = LINES / 2 - (is_registration_ ? 3 : 2) - 3;
+  int x = (COLS / 2) - 15;
+  int y = (LINES / 2) - (is_registration_ ? 3 : 2) - 3;
   if (is_registration_) {
     draw_field("Username:", username_, x, y, 0);
     draw_field("Login:   ", login_, x, y + 2, 1);
@@ -184,8 +193,8 @@ void SignScreen::draw_fields() {
 }
 
 void SignScreen::draw_switcher() {
-  int x = COLS / 2 - 4;
-  int y = LINES / 2 - (is_registration_ ? 0 : 1);
+  int x = (COLS / 2) - 4;
+  int y = (LINES / 2) - (is_registration_ ? 0 : 1);
   ColorPairs current_color = current_field_ == (is_registration_ ? 3 : 2)
       ? ACTIVE_PAIR : DEFAULT_PAIR;
   apply_color(content_win_, current_color, true);
@@ -199,7 +208,7 @@ void SignScreen::draw_switcher() {
 
 void SignScreen::draw_submit_button() {
   int x = COLS / 2;
-  int y = LINES / 2 - (is_registration_ ? -3 : -1);
+  int y = (LINES / 2) - (is_registration_ ? -3 : -1);
   ColorPairs current_color = current_field_ == (is_registration_ ? 4 : 3)
       ? ACTIVE_PAIR : DEFAULT_PAIR;
   draw_button(content_win_, x, y, current_color, " Submit ");

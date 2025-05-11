@@ -1,3 +1,4 @@
+
 //
 // Created by sheyme on 23/04/25.
 //
@@ -7,24 +8,18 @@
 
 #include "abstract_screen.hpp"
 
+using Result = AbstractScreen::Result;
+
 class SignScreen : public AbstractScreen {
  public:
-  enum class Result {
-    None,
-    Login,
-    Register,
-    Exit
-  };
-
-  SignScreen(bool is_registration = false);
+  SignScreen(bool is_registration = false, const std::string& status = "",
+             ColorPairs color = ACTIVE_PAIR);
 
   std::string get_username() const { return username_; }
   std::string get_login() const { return login_; }
   std::string get_password() const { return password_; }
 
   void switch_screen();
-  void set_status(const std::string& message,
-                  ColorPairs color = SYSTEM_NOTIFICATION_PAIR);
 
   void refresh() override;
 
@@ -50,6 +45,7 @@ class SignScreen : public AbstractScreen {
 
   void draw_borders();
 
+  void swap_status();
   void draw_status();
 
   void draw_field(const std::string& label, const std::string& value,
@@ -65,8 +61,10 @@ class SignScreen : public AbstractScreen {
 
   bool is_registration_{false};
   int current_field_{0};
-  std::string status_message_;
-  ColorPairs status_color_{SYSTEM_NOTIFICATION_PAIR};
+
+  std::string status_message_{"Authentication"};
+  ColorPairs status_color_{ACTIVE_PAIR};
+
   std::string username_;
   std::string login_;
   std::string password_;

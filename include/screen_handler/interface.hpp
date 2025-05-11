@@ -22,12 +22,10 @@ class Interface {
  public:
   Interface();
 
-  static void RenderGreeting();
+  static Result RenderGreeting();
 
-  Result RenderAR(bool is_registration = false);
-  void SetARScreenStatus(const std::string& status,
-                         ColorPairs color = SYSTEM_NOTIFICATION_PAIR);
-  void SwitchARScreen();
+  Result RenderAR(bool is_registration = false, const std::string& status = "",
+                  ColorPairs color = ACTIVE_PAIR);
   [[nodiscard]] UserData GetUserData() const { return user_data_; }
 
   void RenderChat();

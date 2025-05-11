@@ -1,3 +1,4 @@
+
 //
 // Created by sheyme on 24/04/25.
 //
@@ -9,16 +10,20 @@ Interface::Interface() {
   setup_colors();
 }
 
-void Interface::RenderGreeting() {
+Result Interface::RenderGreeting() {
   GreetingScreen greeting_screen;
-  bool is_pressed = false;
-  while (!is_pressed) {
-    is_pressed = greeting_screen.handle_input();
+  while (true) {
+    auto state = greeting_screen.handle_input();
+    if (state != Result::None) {
+      return state;
+    }
   }
+  return Result ::None;
 }
 
-Result Interface::RenderAR(bool is_registration) {
-  sign_screen_ = new SignScreen(is_registration);
+Result Interface::RenderAR(bool is_registration, const std::string& status,
+                           ColorPairs color) {
+  sign_screen_ = new SignScreen(is_registration, status, color);
   bool is_submitted = false;
   Result state;
   while (!is_submitted) {
@@ -44,19 +49,10 @@ Result Interface::RenderAR(bool is_registration) {
   return state;
 }
 
-void Interface::SetARScreenStatus(const std::string& status, ColorPairs color) {
-  sign_screen_->set_status(status, color);
-  sign_screen_->refresh();
-}
-
-void Interface::SwitchARScreen() {
-  sign_screen_->switch_screen();
-  sign_screen_->set_status("Registration achieved", ACTIVE_PAIR);
-}
-
 void Interface::RenderChat() {
   chat_screen_ = new ChatScreen();
-  chat_screen_->update_username(user_data_.login);  //TODO(Sheyme): потом сюда юзернейм кидать, а не логин
+  chat_screen_->update_username(user_data_.login);
+  //TODO(Sheyme): потом сюда юзернейм кидать, а не логин
   chat_screen_->refresh();
 }
 

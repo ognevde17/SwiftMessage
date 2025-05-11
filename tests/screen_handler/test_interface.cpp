@@ -1,3 +1,4 @@
+
 //
 // Created by sheyme on 28/04/25.
 //
@@ -13,13 +14,25 @@ int main() {
   try {
     Interface interface;
 
-    Interface::RenderGreeting();
     Result state = Result::None;
+    bool is_registration = false;
     while (true) {
-      state = interface.RenderAR();
+      state = Interface::RenderGreeting();
       if (state == Result::Register) {
-        interface.SetARScreenStatus("Registration achieved", ACTIVE_PAIR);
-        interface.SwitchARScreen();
+        is_registration = true;
+        break;
+      }
+      if (state == Result::Login) {
+        break;
+      }
+    }
+
+    while (true) {
+      state = interface.RenderAR(is_registration,
+                                 is_registration ? "Registration" : "Authentication");
+//      state = interface.RenderAR(false, "Registration achieved");
+//      state = interface.RenderAR(true, "Error due registration", SYSTEM_NOTIFICATION_PAIR);
+      if (state == Result::Register) {
         continue;
       }
       if (state == Result::Login || state == Result::Exit) {

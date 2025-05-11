@@ -11,7 +11,7 @@ class GreetingScreen : public AbstractScreen {
  public:
   GreetingScreen();
 
-  bool handle_input();
+  Result handle_input();
 
   void refresh() override;
 
@@ -24,6 +24,8 @@ class GreetingScreen : public AbstractScreen {
   void handle_resize();
 
   void draw_ui();
+
+  int current_field{1};
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_GREETING_SCREEN_HPP_
