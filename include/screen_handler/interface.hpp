@@ -10,8 +10,6 @@
 #include "sign_screen.hpp"
 #include "chat_screen.hpp"
 
-using Result = SignScreen::Result;
-
 struct UserData {
   std::string username;
   std::string login;
@@ -47,9 +45,9 @@ class Interface {
   ~Interface();
 
  private:
-  static void init_ncurses();
+  static void InitNcurses();
 
-  static void setup_colors();
+  static void SetupColors();
 
   UserData user_data_;
   SignScreen* sign_screen_{nullptr};

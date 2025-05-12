@@ -6,8 +6,8 @@
 #include "../../include/screen_handler/interface.hpp"
 
 Interface::Interface() {
-  init_ncurses();
-  setup_colors();
+  InitNcurses();
+  SetupColors();
 }
 
 Result Interface::RenderGreeting() {
@@ -23,6 +23,7 @@ Result Interface::RenderGreeting() {
 
 Result Interface::RenderAR(bool is_registration, const std::string& status,
                            ColorPairs color) {
+  delete sign_screen_;
   sign_screen_ = new SignScreen(is_registration, status, color);
   bool is_submitted = false;
   Result state;
@@ -52,7 +53,7 @@ Result Interface::RenderAR(bool is_registration, const std::string& status,
 void Interface::RenderChat() {
   chat_screen_ = new ChatScreen();
   chat_screen_->update_username(user_data_.login);
-  //TODO(Sheyme): потом сюда юзернейм кидать, а не логин
+  // TODO(Sheyme): потом сюда юзернейм кидать, а не логин
   chat_screen_->refresh();
 }
 
@@ -112,7 +113,7 @@ Interface::~Interface() {
   endwin();
 }
 
-void Interface::init_ncurses() {
+void Interface::InitNcurses() {
   if (!ncurses_initialized) {
     initscr();
     cbreak();
@@ -126,7 +127,7 @@ void Interface::init_ncurses() {
   }
 }
 
-void Interface::setup_colors() {
+void Interface::SetupColors() {
   if (has_colors()) {
     init_pair(DEFAULT_PAIR, COLOR_WHITE, COLOR_BLACK);
     init_pair(ACTIVE_PAIR, COLOR_CYAN, COLOR_BLACK);
