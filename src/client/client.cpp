@@ -13,10 +13,12 @@ Client::~Client() { Disconnect(); }
 bool Client::Connect() {
   try {
     connection_.Connect();
-    interface_.ShowMessage("Успешное подключение к серверу");
+    //std::cout << "CONNECTION" << std::endl;
+    //interface_.DisplayAnnouncement("Успешное подключение к серверу");
+    //std::cout << "FUCK" << std::endl;
     return true;
   } catch (...) {
-    interface_.ShowError("Ошибка подключения к серверу");
+    //interface_.ShowError("Ошибка подключения к серверу");
     return false;
   }
 }
@@ -28,14 +30,14 @@ void Client::Disconnect() {
     receiver_thread_.join();
   }
   connection_.Disconnect();
-  interface_.ShowMessage("Отключено от сервера");
+  //interface_.DisplayAnnouncement("Отключено от сервера");
 }
 
 void Client::SendMessage(const std::string& sender_login,
                         const std::string& rec_login, 
                         const std::string& message) {
   if (!connection_.is_connected) {
-    interface_.ShowError("Нет соединения с сервером");
+    //interface_.ShowError("Нет соединения с сервером");
     return;
   }
   
@@ -45,19 +47,22 @@ void Client::SendMessage(const std::string& sender_login,
   data.sender_login = sender_login;
   
   if (!connection_.send(data.to_string())) {
-    interface_.ShowError("Ошибка отправки сообщения");
+    //interface_.ShowError("Ошибка отправки сообщения");
   }
 }
 
 void Client::StartMessageLoop(const std::string& sender_login, 
                              const std::string& rec_login) {
+  is_running_ = true;
   while (is_running_) {
-    auto message = interface_.GetInput();
+    auto message = interface_.GetInputMessage();
     if (message == "endendend") {
       Disconnect();
       break;
     }
+    //std::cout << "DOSENDMES\n";
     SendMessage(sender_login, rec_login, message);
+    //std::cout << "POSLESENDMES\n";
   }
 }
 
@@ -67,21 +72,24 @@ void Client::Receive() {
       continue;
     }
     try {
+      //std::cout << "OK1\n";
       std::string received = connection_.receive(1024);
+      //std::cout << "OK2\n";
       SendMessageRequest data = SendMessageRequest::from_string(received);
       if (!data.message_text.empty()) {
-        interface_.DisplayMessage(data.sender_login, data.message_text);
+        interface_.ShowMessage(data.sender_login, data.message_text);
       }
+      //std::cout << "OK3\n";
     } catch (const boost::system::system_error& e) {
       if (e.code() == boost::asio::error::eof) {
-        interface_.ShowError("Сервер закрыл соединение");
+        //interface_.ShowError("Сервер закрыл соединение");
       } else {
-        interface_.ShowError(std::string("Ошибка приёма: ") + e.what());
+        //interface_.ShowError(std::string("Ошибка приёма: ") + e.what());
       }
       Disconnect();
       break;
     } catch (...) {
-      interface_.ShowError("Неизвестная ошибка приёма");
+      //interface_.ShowError("Неизвестная ошибка приёма");
       Disconnect();
       break;
     }
@@ -94,49 +102,55 @@ void Client::StartReceive() {
 }
 
 bool Client::Authenticate() {
-  auto credentials = interface_.GetAuthCredentials();
+  std::cout << "auth\n";
+  interface_.RenderAR();
+  auto data = interface_.GetUserData();
   try {
-    if (connection_.SendAuthRequest(credentials.login, credentials.password)) {
-      user_login_ = credentials.login;
+    if (connection_.SendAuthRequest(data.login, data.password)) {
+      user_login_ = data.login;
       is_auth_ = true;
-      interface_.ShowMessage("Аутентификация успешна");
+      std::cout << "SUCCESS" << std::endl;
+      //interface_.DisplayAnnouncement("Аутентификация успешна");
       return true;
     } else {
-      interface_.ShowError("Ошибка аутентификации");
+      //interface_.ShowError("Ошибка аутентификации");
       return false;
     }
   } catch (...) {
-    interface_.ShowError("Ошибка при аутентификации");
+    //interface_.ShowError("Ошибка при аутентификации");
     return false;
   }
 }
 
 bool Client::Register() {
+  //interface_.RenderAR();
   auto credentials = interface_.GetRegistrationCredentials();
   try {
     std::string answer = connection_.SendRegRequest(credentials.login, 
                                                  credentials.password);
     if (answer == "You have successfully registered") {
       user_login_ = credentials.login;
-      interface_.ShowMessage("Регистрация успешна");
+      //interface_.DisplayAnnouncement("Регистрация успешна");
       return true;
     } else if (answer == "ERROR1") {
-      interface_.ShowError("Ошибка: пользователь уже существует");
+      //interface_.ShowError("Ошибка: пользователь уже существует");
       return false;
     } else {
-      interface_.ShowError("Ошибка регистрации");
+      //interface_.ShowError("Ошибка регистрации");
       return false;
     }
   } catch (...) {
-    interface_.ShowError("Ошибка при регистрации");
+    //interface_.ShowError("Ошибка при регистрации");
     return false;
   }
 }
 
 void Client::Run() {
   if (!Connect()) return;
-
+  interface_.RenderGreeting();
   while (!is_auth_) {
+    
+
     auto auth_choice = interface_.GetAuthChoice();
     if (auth_choice == AuthChoice::Register) {
       Register();
@@ -146,8 +160,9 @@ void Client::Run() {
   }
 
   auto recipient = interface_.GetRecipientLogin();
+  interface_.RenderChat();
   StartReceive();
   
-  interface_.ShowMessage("Начало чата с " + recipient);
+  //interface_.DisplayAnnouncement("Начало чата с " + recipient);
   StartMessageLoop(user_login_, recipient);
 }
