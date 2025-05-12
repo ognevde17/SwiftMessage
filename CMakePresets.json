@@ -1,0 +1,18 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "dev-interface",
+      "displayName": "Development Build",
+      "description": "Build an interface test",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "BUILD_SERVER": "OFF",
+        "BUILD_CLIENT": "OFF",
+        "BUILD_DB_TEST": "OFF",
+        "BUILD_INTERFACE_TEST": "ON"
+      }
+    }
+  ]
+}

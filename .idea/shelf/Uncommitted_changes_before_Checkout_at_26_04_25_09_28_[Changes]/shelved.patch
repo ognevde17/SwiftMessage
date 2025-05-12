@@ -1,0 +1,26 @@
+Index: CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>cmake_minimum_required(VERSION 3.10)\nproject(SwiftMessage)\n\nset(CMAKE_CXX_STANDARD 17)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\n\nset(SERVER_NAME ${PROJECT_NAME}_Server)\nset(CLIENT_NAME ${PROJECT_NAME}_Client)\nset(DB_TEST_NAME ${PROJECT_NAME}_DbTest)\n\n# Дефолтные значения тех, кого мы будем собирать\noption(BUILD_CLIENT \"Build SwiftMessage client\"    ON)\noption(BUILD_SERVER \"Build SwiftMessage server\"    ON)\noption(BUILD_DB_TEST \"Build database tests\"        OFF)\n\nfind_package(Boost REQUIRED COMPONENTS system thread serialization)\n\ninclude_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})\n\nif (BUILD_SERVER OR BUILD_DB_TEST)\n  find_package(PostgreSQL REQUIRED)\n  find_library(PQXX_LIB pqxx)\nendif()\n\nif (BUILD_SERVER)\n    add_executable(${SERVER_NAME}\n        src/server/main.cpp\n        src/server/database_manager.cpp\n        src/server/connection_manager.cpp\n        src/server/request_manager.cpp\n        src/server/server.cpp\n    )\n\n    target_link_libraries(${SERVER_NAME}\n        PRIVATE\n        Boost::system\n        Boost::thread\n        Boost::serialization\n        ${PQXX_LIB}\n        ${PostgreSQL_LIBRARIES}\n    )\nendif()\n\nif (BUILD_CLIENT)\n    add_executable(${CLIENT_NAME}\n        src/client/main.cpp\n        src/client/connection_manager.cpp\n        src/client/client.cpp\n        src/client/interface.cpp\n    )\n\n    target_link_libraries(${CLIENT_NAME}\n        PRIVATE\n        Boost::system\n        Boost::thread\n        Boost::serialization\n    )\nendif()\n\n\nif (BUILD_DB_TEST)\n    add_executable(${DB_TEST_NAME}\n        tests/database/test_database_manager.cpp\n        src/server/database_manager.cpp\n    )\n\n    target_link_libraries(${DB_TEST_NAME}\n        PRIVATE\n        ${PQXX_LIB}\n        ${PostgreSQL_LIBRARIES}\n    )\nendif()\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	(revision 2008275b4adee94501c11fdbb27f214c82a15ffc)
++++ b/CMakeLists.txt	(date 1745648830111)
+@@ -43,10 +43,11 @@
+ 
+ if (BUILD_CLIENT)
+     add_executable(${CLIENT_NAME}
+-        src/client/main.cpp
+-        src/client/connection_manager.cpp
+-        src/client/client.cpp
+-        src/client/interface.cpp
++#        src/client/main.cpp
++#        src/client/connection_manager.cpp
++#        src/client/client.cpp
++#        src/client/interface.cpp
++        src/client/test.cpp
+     )
+ 
+     target_link_libraries(${CLIENT_NAME}

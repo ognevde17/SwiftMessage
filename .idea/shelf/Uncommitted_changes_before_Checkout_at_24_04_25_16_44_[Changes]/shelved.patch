@@ -1,0 +1,597 @@
+Index: src/client/main.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>//\n// blocking_tcp_echo_client.cpp\n// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n//\n// Copyright (c) 2003-2024 Christopher M. Kohlhoff (chris at kohlhoff dot com)\n//\n// Distributed under the Boost Software License, Version 1.0. (See accompanying\n// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)\n//\n\n#include <iostream>\n#include <boost/asio.hpp>\n#include \"../screen_handler/interface.hpp\"\n#include \"../screen_handler/chat_screen.hpp\"\n\nusing boost::asio::ip::tcp;\n\nint main(int argc, char* argv[]) {\n  try {\n    if (argc != 3) {\n      std::cerr << \"Usage: blocking_tcp_echo_client <host> <port>\\n\";\n      return 1;\n    }\n\n    boost::asio::io_context io_context;\n    tcp::socket s(io_context);\n    tcp::resolver resolver(io_context);\n\n    Interface interface;\n\n    Interface::RenderGreeting();\n    interface.RenderAR();  //TODO: большой иф с выходом, если просто Result::Exit\n    auto user_data = interface.GetUserData();\n\n    ChatScreen client_win(argv[1], argv[2]);\n    client_win.update_status(\"Connecting...\");\n    boost::asio::connect(s, resolver.resolve(argv[1], argv[2]));\n    client_win.update_status(\"Connected\");\n    client_win.add_message(\"Logged as: \" + user_data.login, true);\n    client_win.add_message(\"Type 'exit' to quit\", true);\n    while (true) {\n      if (client_win.handle_input()) {\n        std::string request = client_win.get_request();\n        if (request == \"exit\") {\n          client_win.add_message(\"Disconnecting...\", true);\n          break;\n        }\n        client_win.add_message(request);\n        boost::asio::write(s, boost::asio::buffer(request));\n        client_win.catch_reply(s);\n      }\n    }\n  }\n  catch (std::exception& e)\n  {\n    std::cerr << \"Exception: \" << e.what() << \"\\n\";\n  }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/client/main.cpp b/src/client/main.cpp
+--- a/src/client/main.cpp	(revision 1dfd242f36b30afd535e836401601e11a6fb6ed1)
++++ b/src/client/main.cpp	(date 1745502057337)
+@@ -35,22 +35,31 @@
+     ChatScreen client_win(argv[1], argv[2]);
+     client_win.update_status("Connecting...");
+     boost::asio::connect(s, resolver.resolve(argv[1], argv[2]));
+-    client_win.update_status("Connected");
++    std::string status = "Connected to ";
++    status += argv[1];
++    status += ':';
++    status += argv[2];
++    client_win.update_status(status);
+     client_win.add_message("Logged as: " + user_data.login, true);
+     client_win.add_message("Type 'exit' to quit", true);
++
+     while (true) {
+-      if (client_win.handle_input()) {
+-        std::string request = client_win.get_request();
++      if (client_win.handle_input() == ChatScreen::Result::NewMessage) {
++        auto request = client_win.get_current_input();
+         if (request == "exit") {
+-          client_win.add_message("Disconnecting...", true);
++          client_win.update_status("Disconnecting...");
+           break;
+         }
+         client_win.add_message(request);
+         boost::asio::write(s, boost::asio::buffer(request));
+-        client_win.catch_reply(s);
++        char reply[1024];
++        size_t reply_length = s.read_some(boost::asio::buffer(reply, 1024));
++        reply[reply_length] = '\0';
++        client_win.add_message("Server: " + std::string(reply), true);
+       }
+     }
+   }
++
+   catch (std::exception& e)
+   {
+     std::cerr << "Exception: " << e.what() << "\n";
+Index: src/screen_handler/chat_screen.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>//\n// Created by sheyme on 18/03/25.\n//\n\n#ifndef SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_\n#define SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_\n\n#include <boost/asio.hpp>\n#include <vector>\n#include \"abstract_screen.hpp\"\n\nenum { max_length = 1024 };\n\nclass ChatScreen : public AbstractScreen {\n public:\n  ChatScreen(std::string&& host, std::string&& port)\n      : AbstractScreen(),\n        host_(std::move(host)),\n        port_(std::move(port)) {\n    create_windows();\n    post_create();\n    setup_colors();\n    update_status(\"Connecting to \" + host_ + \":\" + port_);\n    redraw_all();\n  }\n\n  void update_status(const std::string& status) {\n    status_ = wrap_text(status, getmaxx(contacts_win_) - 4);\n    redraw_contacts();\n  }\n\n  void add_message(const std::string& msg, bool is_reply = false) {\n    messages_.emplace_back(wrap_text(msg,\n                                     getmaxx(chat_win_) - 4), is_reply);\n    if (messages_.size() > max_messages_) {\n      messages_.erase(messages_.begin());\n    }\n    scroll_position_ = std::max(0, static_cast<int>(\n        messages_.size()) - getmaxy(chat_win_) + 3);\n    redraw_chat();\n  }\n\n  bool handle_input() {\n    int ch = wgetch(input_win_);\n    switch (ch) {\n      case KEY_RESIZE: {\n        handle_resize();\n        break;\n      }\n      case '\\n':\n      case KEY_ENTER: {\n        return true;\n      }\n      case KEY_UP: {\n        handle_scroll(ch);\n        break;\n      }\n      case KEY_DOWN: {\n        handle_scroll(ch);\n        break;\n      }\n      default: {\n        handle_char(ch);\n        break;\n      }\n    }\n    return false;\n  }\n\n  char* get_request() {\n    strncpy(last_request_, current_input_.c_str(), max_length - 1);\n    last_request_[max_length - 1] = '\\0';\n    return last_request_;\n  }\n\n  template<typename Socket>\n  void catch_reply(Socket& socket) {\n    char reply[max_length];\n    size_t reply_length =\n        socket.read_some(boost::asio::buffer(reply, max_length));\n    reply[reply_length] = '\\0';\n    add_message(\"Server: \" + std::string(reply), true);\n  }\n\n  ~ChatScreen() override {\n    delwin(contacts_win_);\n    delwin(input_win_);\n    delwin(chat_win_);\n  }\n\n protected:\n  void create_windows() override {\n    AbstractScreen::create_windows();\n    // высота LINES, ширина 25%, далее левый угол\n    contacts_win_ = derwin(main_win_, LINES, COLS / 4, 0, 0);\n    // высота LINES - 3, ширина 75%, далее левый угол\n    chat_win_ = derwin(main_win_, LINES - 3, COLS * 3 / 4, 0, COLS / 4);\n    // высота 3, ширина 75%, далее левый угол\n    input_win_ = derwin(main_win_, 3, COLS * 3 / 4, LINES - 3, COLS / 4);\n    box(input_win_, 1, 1);\n    scrollok(chat_win_, true);\n    keypad(input_win_, true);\n  }\n\n  void post_create() override {\n    box(main_win_, 0, 0);\n    refresh();\n  }\n\n private:\n  void setup_colors() {\n    if (has_colors()) {\n      init_pair(CONTACTS_PAIR, COLOR_WHITE, COLOR_BLUE);\n      init_pair(CHAT_PAIR, COLOR_BLACK, COLOR_WHITE);\n      init_pair(REPLY_PAIR, COLOR_GREEN, COLOR_WHITE);\n      init_pair(INPUT_PAIR, COLOR_BLACK, COLOR_CYAN);\n    }\n    wbkgd(contacts_win_, COLOR_PAIR(DEFAULT_PAIR));\n    wbkgd(chat_win_, COLOR_PAIR(DEFAULT_PAIR));\n    wbkgd(input_win_, COLOR_PAIR(DEFAULT_PAIR));\n  }\n\n  static std::string wrap_text(const std::string& text, int width) {\n    std::string result;\n    size_t line_start = 0;\n    size_t last_space = 0;\n    for (size_t i = 0; i < text.size(); ++i) {\n      if (text[i] == ' ') {\n        last_space = i;\n      }\n      if (i - line_start >= static_cast<size_t>(width)) {\n        if (last_space > line_start) {\n          result += text.substr(line_start, last_space - line_start) + '\\n';\n          line_start = last_space + 1;\n          last_space = line_start;\n        } else {\n          result += text.substr(line_start, width) + '\\n';\n          line_start += width;\n        }\n      }\n    }\n    if (line_start < text.size()) {\n      result += text.substr(line_start);\n    }\n    return result;\n  }\n\n  void handle_char(int ch) {\n    echo();\n    curs_set(1);\n    werase(input_win_);\n    box(input_win_, 0, 0);\n    if (ch == KEY_BACKSPACE || ch == 127) {\n      if (!current_input_.empty()) {\n        current_input_.pop_back();\n      }\n    } else if (isprint(ch)) {\n      current_input_ += static_cast<char>(ch);\n    }\n    std::string input_line = \"> \" + current_input_;\n    mvwprintw(input_win_, 1, 2, \"%s\", input_line.c_str());\n    wmove(input_win_, 1, 4 + static_cast<int>(current_input_.length()));\n    wrefresh(input_win_);\n    curs_set(0);\n    noecho();\n  }\n\n  void handle_scroll(int key) {\n    if (key == KEY_UP && scroll_position_ > 0) {\n      scroll_position_--;\n      redraw_chat();\n    }\n    else if (key == KEY_DOWN && scroll_position_ < static_cast<int>(\n        messages_.size()) - getmaxy(chat_win_) + 3) {\n      scroll_position_++;\n      redraw_chat();\n    }\n  }\n\n  void handle_resize() {\n    delwin(contacts_win_);\n    delwin(input_win_);\n    delwin(chat_win_);\n    create_windows();\n    setup_colors();\n    redraw_all();\n  }\n\n  void redraw_all() {\n    redraw_contacts();\n    redraw_chat();\n  }\n\n  void redraw_contacts() {\n    werase(contacts_win_);\n    box(contacts_win_, 0, 0);\n    std::string title = host_ + \":\" + port_;\n    wattron(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));\n    mvwprintw(contacts_win_, 0,\n              (getmaxx(contacts_win_) - title.length()) / 2,\n              \"%s\", title.c_str());\n    wattroff(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));\n    int line = 1;\n    size_t start = 0;\n    while (start < status_.length() && line < getmaxy(contacts_win_) - 1) {\n      size_t end = status_.find('\\n', start);\n      if (end == std::string::npos) end = status_.length();\n      mvwprintw(contacts_win_, line++, static_cast<int>(end - start) / 2 + 1,\n                \"%.*s\", static_cast<int>(end - start), status_.c_str() + start);\n      start = end + 1;\n    }\n    wrefresh(contacts_win_);\n  }\n\n  void redraw_chat() {\n    werase(chat_win_);\n    box(chat_win_, 0, 0);\n    int col = 1;\n    int start_msg = std::max(0, scroll_position_);\n    int end_msg = std::min(start_msg + getmaxy(chat_win_) - 2,\n                           static_cast<int>(messages_.size()));\n    for (int idx = start_msg; idx < end_msg && col < getmaxy(chat_win_) - 1; ++idx) {\n      const auto& [msg, is_reply] = messages_[idx];\n      wattron(chat_win_, COLOR_PAIR(is_reply ? ACTIVE_PAIR : DEFAULT_PAIR));\n      size_t pos = 0;\n      while (pos < msg.length() && col < getmaxy(chat_win_) - 1) {\n        size_t end = msg.find('\\n', pos);\n        if (end == std::string::npos) {\n          end = msg.length();\n        }\n        mvwprintw(chat_win_, col++, 2, \"%.*s\",\n                  static_cast<int>(end-pos), msg.c_str()+pos);\n        pos = end + 1;\n      }\n      wattroff(chat_win_, COLOR_PAIR(is_reply ? ACTIVE_PAIR : DEFAULT_PAIR));\n    }\n    if (scroll_position_ > 0 || end_msg < static_cast<int>(messages_.size())) {\n      std::string scroll_ind = \"^ \" + std::to_string(scroll_position_+1)\n          + \"/\" + std::to_string(messages_.size()) + \" v\";\n      mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_ind.length() - 1,\n                \"%s\", scroll_ind.c_str());\n    }\n    wrefresh(chat_win_);\n  }\n\n  WINDOW* contacts_win_;\n  WINDOW* input_win_;\n  WINDOW* chat_win_;\n  std::string host_;\n  std::string port_;\n  std::string status_;\n  std::string current_input_;\n  std::vector<std::pair<std::string, bool>> messages_;\n  char last_request_[max_length]{};\n  const size_t max_messages_{1000};\n  int scroll_position_{0};\n};\n\n#endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_\n
+===================================================================
+diff --git a/src/screen_handler/chat_screen.hpp b/src/screen_handler/chat_screen.hpp
+--- a/src/screen_handler/chat_screen.hpp	(revision 1dfd242f36b30afd535e836401601e11a6fb6ed1)
++++ b/src/screen_handler/chat_screen.hpp	(date 1745502057341)
+@@ -1,259 +1,305 @@
+ //
+-// Created by sheyme on 18/03/25.
++// Created by sheyme on 24/04/25.
+ //
+ 
+-#ifndef SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_
+-#define SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_
++#ifndef SWIFTMESSAGE_INCLUDE_SCREEN_HANDLER_CHAT_SCREEN_HPP_
++#define SWIFTMESSAGE_INCLUDE_SCREEN_HANDLER_CHAT_SCREEN_HPP_
+ 
+-#include <boost/asio.hpp>
++#include <algorithm>
+ #include <vector>
++
+ #include "abstract_screen.hpp"
+ 
+-enum { max_length = 1024 };
++struct Message {
++  Message() = default;
++
++  Message(std::string&& message, bool is_reply = false)
++      : text(std::move(message)), is_reply(is_reply) {}
++
++  std::string text;
++  bool is_reply;
++};
+ 
+ class ChatScreen : public AbstractScreen {
+  public:
+-  ChatScreen(std::string&& host, std::string&& port)
+-      : AbstractScreen(),
+-        host_(std::move(host)),
+-        port_(std::move(port)) {
+-    create_windows();
+-    post_create();
+-    setup_colors();
+-    update_status("Connecting to " + host_ + ":" + port_);
+-    redraw_all();
+-  }
+-
+-  void update_status(const std::string& status) {
+-    status_ = wrap_text(status, getmaxx(contacts_win_) - 4);
+-    redraw_contacts();
+-  }
+-
+-  void add_message(const std::string& msg, bool is_reply = false) {
+-    messages_.emplace_back(wrap_text(msg,
+-                                     getmaxx(chat_win_) - 4), is_reply);
+-    if (messages_.size() > max_messages_) {
+-      messages_.erase(messages_.begin());
+-    }
+-    scroll_position_ = std::max(0, static_cast<int>(
+-        messages_.size()) - getmaxy(chat_win_) + 3);
+-    redraw_chat();
+-  }
++  enum class Result {
++    None,
++    NewMessage,
++    Scroll,
++    Exit
++  };
++
++  ChatScreen(std::string&& host, std::string&& port);
++
++  Result handle_input();
++  std::string get_current_input();
++
++  void refresh() override;
++  void update_status(const std::string& status);
++  void add_message(const std::string& message, bool is_reply = false);
++
++  void clear_chat();
++  ~ChatScreen() override;
++
++ protected:
++  void create_windows() override;
++  void post_create() override;
++
++ private:
++  void init_colors();
++  static std::string wrap_text(const std::string& text, int width);
++
++  void handle_resize();
++  void handle_char(int ch);
++  void handle_scroll(int direction);
++
++  void draw_contacts();
++  void draw_chat();
++  void draw_input_field();
++  void draw_layout();
++
++  WINDOW* contacts_win_;
++  WINDOW* chat_win_;
++  WINDOW* input_win_;
++  std::string host_;
++  std::string port_;
++  std::string status_;
++  std::string current_input_;
++  std::vector<Message> messages_;
++  int scroll_position_{0};
++  const int kMaxMessages = 1000;
++};
++
++ChatScreen::ChatScreen(std::string&& host, std::string&& port)
++    : AbstractScreen(), host_(std::move(host)), port_(std::move(port)) {
++  create_windows();
++  post_create();
++  init_colors();
++  refresh();
++}
+ 
+-  bool handle_input() {
+-    int ch = wgetch(input_win_);
+-    switch (ch) {
+-      case KEY_RESIZE: {
+-        handle_resize();
+-        break;
+-      }
+-      case '\n':
+-      case KEY_ENTER: {
+-        return true;
+-      }
+-      case KEY_UP: {
+-        handle_scroll(ch);
+-        break;
+-      }
+-      case KEY_DOWN: {
+-        handle_scroll(ch);
+-        break;
+-      }
+-      default: {
+-        handle_char(ch);
+-        break;
+-      }
+-    }
+-    return false;
+-  }
+-
+-  char* get_request() {
+-    strncpy(last_request_, current_input_.c_str(), max_length - 1);
+-    last_request_[max_length - 1] = '\0';
+-    return last_request_;
+-  }
+-
+-  template<typename Socket>
+-  void catch_reply(Socket& socket) {
+-    char reply[max_length];
+-    size_t reply_length =
+-        socket.read_some(boost::asio::buffer(reply, max_length));
+-    reply[reply_length] = '\0';
+-    add_message("Server: " + std::string(reply), true);
+-  }
+-
+-  ~ChatScreen() override {
+-    delwin(contacts_win_);
+-    delwin(input_win_);
+-    delwin(chat_win_);
+-  }
+-
+- protected:
+-  void create_windows() override {
+-    AbstractScreen::create_windows();
+-    // высота LINES, ширина 25%, далее левый угол
+-    contacts_win_ = derwin(main_win_, LINES, COLS / 4, 0, 0);
+-    // высота LINES - 3, ширина 75%, далее левый угол
+-    chat_win_ = derwin(main_win_, LINES - 3, COLS * 3 / 4, 0, COLS / 4);
+-    // высота 3, ширина 75%, далее левый угол
+-    input_win_ = derwin(main_win_, 3, COLS * 3 / 4, LINES - 3, COLS / 4);
+-    box(input_win_, 1, 1);
+-    scrollok(chat_win_, true);
+-    keypad(input_win_, true);
+-  }
++void ChatScreen::create_windows() {
++  AbstractScreen::create_windows();
++  int contacts_width = COLS / 4;
++  contacts_win_ = derwin(main_win_, LINES, contacts_width, 0, 0);
++  chat_win_ = derwin(main_win_, LINES - 3, COLS - contacts_width,
++                     0, contacts_width);
++  input_win_ = derwin(main_win_, 3, COLS - contacts_width,
++                      LINES - 3, contacts_width);
++  keypad(input_win_, true);
++  scrollok(chat_win_, true);
++  wtimeout(input_win_, 100);
++}
+ 
+-  void post_create() override {
+-    box(main_win_, 0, 0);
+-    refresh();
+-  }
++void ChatScreen::post_create() {
++  box(main_win_, 0, 0);
++  wrefresh(main_win_);
++}
+ 
+- private:
+-  void setup_colors() {
+-    if (has_colors()) {
+-      init_pair(CONTACTS_PAIR, COLOR_WHITE, COLOR_BLUE);
+-      init_pair(CHAT_PAIR, COLOR_BLACK, COLOR_WHITE);
+-      init_pair(REPLY_PAIR, COLOR_GREEN, COLOR_WHITE);
+-      init_pair(INPUT_PAIR, COLOR_BLACK, COLOR_CYAN);
+-    }
+-    wbkgd(contacts_win_, COLOR_PAIR(DEFAULT_PAIR));
+-    wbkgd(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
+-    wbkgd(input_win_, COLOR_PAIR(DEFAULT_PAIR));
+-  }
++void ChatScreen::init_colors() {
++  if (has_colors()) {
++    init_pair(DEFAULT_PAIR, COLOR_WHITE, COLOR_BLACK);
++    init_pair(ACTIVE_PAIR, COLOR_CYAN, COLOR_BLACK);
++  }
++  wbkgd(contacts_win_, COLOR_PAIR(DEFAULT_PAIR));
++  wbkgd(chat_win_, COLOR_PAIR(DEFAULT_PAIR));
++  wbkgd(input_win_, COLOR_PAIR(DEFAULT_PAIR));
++}
+ 
+-  static std::string wrap_text(const std::string& text, int width) {
+-    std::string result;
+-    size_t line_start = 0;
+-    size_t last_space = 0;
+-    for (size_t i = 0; i < text.size(); ++i) {
+-      if (text[i] == ' ') {
+-        last_space = i;
+-      }
+-      if (i - line_start >= static_cast<size_t>(width)) {
+-        if (last_space > line_start) {
+-          result += text.substr(line_start, last_space - line_start) + '\n';
+-          line_start = last_space + 1;
+-          last_space = line_start;
+-        } else {
+-          result += text.substr(line_start, width) + '\n';
+-          line_start += width;
+-        }
+-      }
+-    }
+-    if (line_start < text.size()) {
+-      result += text.substr(line_start);
+-    }
+-    return result;
+-  }
++void ChatScreen::refresh() {
++  werase(main_win_);
++  draw_layout();
++}
++
++std::string ChatScreen::get_current_input() {
++  auto input_copy = current_input_;
++  current_input_.clear();
++  return input_copy;
++}
++
++ChatScreen::Result ChatScreen::handle_input() {
++  int ch = wgetch(input_win_);
++  switch (ch) {
++    case KEY_RESIZE:
++      handle_resize();
++      return Result::None;
++    case KEY_UP:
++      handle_scroll(-1);
++      return Result::Scroll;
++    case KEY_DOWN:
++      handle_scroll(1);
++      return Result::Scroll;
++    case 9:
++      handle_scroll(1);
++      return Result::Scroll;
++    case 27:
++      return Result::Exit;
++    case '\n':
++    case KEY_ENTER:
++      refresh();
++      return Result::NewMessage;
++    default:
++      handle_char(ch);
++      return Result::None;
++  }
++}
++
++std::string ChatScreen::wrap_text(const std::string& text, int width) {
++  std::string result;
++  size_t line_start = 0;
++  size_t last_space = 0;
++  for (size_t i = 0; i < text.size(); ++i) {
++    if (text[i] == ' ') {
++      last_space = i;
++    }
++    if (i - line_start >= static_cast<size_t>(width)) {
++      if (last_space > line_start) {
++        result += text.substr(line_start, last_space - line_start) + '\n';
++        line_start = last_space + 1;
++        last_space = line_start;
++      } else {
++        result += text.substr(line_start, width) + '\n';
++        line_start += width;
++      }
++    }
++  }
++  if (line_start < text.size()) {
++    result += text.substr(line_start);
++  }
++  return result;
++}
+ 
+-  void handle_char(int ch) {
+-    echo();
+-    curs_set(1);
+-    werase(input_win_);
+-    box(input_win_, 0, 0);
+-    if (ch == KEY_BACKSPACE || ch == 127) {
+-      if (!current_input_.empty()) {
+-        current_input_.pop_back();
+-      }
+-    } else if (isprint(ch)) {
+-      current_input_ += static_cast<char>(ch);
+-    }
+-    std::string input_line = "> " + current_input_;
+-    mvwprintw(input_win_, 1, 2, "%s", input_line.c_str());
+-    wmove(input_win_, 1, 4 + static_cast<int>(current_input_.length()));
+-    wrefresh(input_win_);
+-    curs_set(0);
+-    noecho();
++void ChatScreen::add_message(const std::string& message, bool is_reply) {
++  messages_.push_back({wrap_text(message, getmaxx(chat_win_) - 4), is_reply});
++  if (messages_.size() > static_cast<size_t>(kMaxMessages)) {
++    messages_.erase(messages_.begin());
++  }
++  scroll_position_ =
++      std::max(0, static_cast<int>(messages_.size()) - getmaxy(chat_win_) + 2);
++  draw_chat();
++}
++
++void ChatScreen::clear_chat() {
++  messages_.clear();
++  scroll_position_ = 0;
++  draw_chat();
++}
++
++void ChatScreen::handle_char(int ch) {
++  if (ch == KEY_BACKSPACE || ch == 127) {
++    if (!current_input_.empty()) {
++      current_input_.pop_back();
++    }
++  } else if (isprint(ch)) {
++    current_input_ += static_cast<char>(ch);
+   }
+-
+-  void handle_scroll(int key) {
+-    if (key == KEY_UP && scroll_position_ > 0) {
+-      scroll_position_--;
+-      redraw_chat();
+-    }
+-    else if (key == KEY_DOWN && scroll_position_ < static_cast<int>(
+-        messages_.size()) - getmaxy(chat_win_) + 3) {
+-      scroll_position_++;
+-      redraw_chat();
+-    }
+-  }
++  draw_input_field();
++}
+ 
+-  void handle_resize() {
+-    delwin(contacts_win_);
+-    delwin(input_win_);
+-    delwin(chat_win_);
+-    create_windows();
+-    setup_colors();
+-    redraw_all();
+-  }
++void ChatScreen::handle_resize() {
++  delwin(contacts_win_);
++  delwin(input_win_);
++  delwin(chat_win_);
++  create_windows();
++  init_colors();
++  refresh();
++}
+ 
+-  void redraw_all() {
+-    redraw_contacts();
+-    redraw_chat();
++void ChatScreen::handle_scroll(int direction) {
++  int visible_line = getmaxy(chat_win_) - 2;
++  int total_messages = static_cast<int>(messages_.size());
++  int max_scroll = std::max(0, total_messages - visible_line);
++  int new_position = scroll_position_ + direction;
++  if (new_position < 0) {
++    new_position = 0;
++  } else if (new_position > max_scroll) {
++    new_position = max_scroll;
+   }
++  scroll_position_ = new_position;
++  draw_chat();
++}
+ 
+-  void redraw_contacts() {
+-    werase(contacts_win_);
+-    box(contacts_win_, 0, 0);
+-    std::string title = host_ + ":" + port_;
+-    wattron(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));
+-    mvwprintw(contacts_win_, 0,
+-              (getmaxx(contacts_win_) - title.length()) / 2,
+-              "%s", title.c_str());
+-    wattroff(contacts_win_, COLOR_PAIR(ACTIVE_PAIR));
+-    int line = 1;
+-    size_t start = 0;
+-    while (start < status_.length() && line < getmaxy(contacts_win_) - 1) {
+-      size_t end = status_.find('\n', start);
+-      if (end == std::string::npos) end = status_.length();
+-      mvwprintw(contacts_win_, line++, static_cast<int>(end - start) / 2 + 1,
+-                "%.*s", static_cast<int>(end - start), status_.c_str() + start);
+-      start = end + 1;
+-    }
+-    wrefresh(contacts_win_);
+-  }
++void ChatScreen::update_status(const std::string& status) {
++  status_ = wrap_text(status, getmaxx(contacts_win_) - 4);
++}
++
++void ChatScreen::draw_contacts() {
++  werase(contacts_win_);
++  box(contacts_win_, 0, 0);
++  std::string title = host_ + ':' + port_;
++  mvwprintw(contacts_win_, 0, (getmaxx(contacts_win_) - title.length()) / 2,
++            "%s", title.c_str());
++  int line = 2;
++  size_t start = 0;
++  while (start < status_.length() && line <
++                                         static_cast<size_t>(getmaxy(contacts_win_) - 1)) {
++    size_t end = status_.find('\n', start);
++    if (end == std::string::npos) {
++      end = status_.length();
++    }
++    mvwprintw(contacts_win_, line++, 2, "%.*s",
++              static_cast<int>(end - start), status_.c_str() + start);
++    start = end + 1;
++  }
++  wrefresh(contacts_win_);
++}
+ 
+-  void redraw_chat() {
+-    werase(chat_win_);
+-    box(chat_win_, 0, 0);
+-    int col = 1;
+-    int start_msg = std::max(0, scroll_position_);
+-    int end_msg = std::min(start_msg + getmaxy(chat_win_) - 2,
+-                           static_cast<int>(messages_.size()));
+-    for (int idx = start_msg; idx < end_msg && col < getmaxy(chat_win_) - 1; ++idx) {
+-      const auto& [msg, is_reply] = messages_[idx];
+-      wattron(chat_win_, COLOR_PAIR(is_reply ? ACTIVE_PAIR : DEFAULT_PAIR));
+-      size_t pos = 0;
+-      while (pos < msg.length() && col < getmaxy(chat_win_) - 1) {
+-        size_t end = msg.find('\n', pos);
+-        if (end == std::string::npos) {
+-          end = msg.length();
+-        }
+-        mvwprintw(chat_win_, col++, 2, "%.*s",
+-                  static_cast<int>(end-pos), msg.c_str()+pos);
+-        pos = end + 1;
+-      }
+-      wattroff(chat_win_, COLOR_PAIR(is_reply ? ACTIVE_PAIR : DEFAULT_PAIR));
+-    }
+-    if (scroll_position_ > 0 || end_msg < static_cast<int>(messages_.size())) {
+-      std::string scroll_ind = "^ " + std::to_string(scroll_position_+1)
+-          + "/" + std::to_string(messages_.size()) + " v";
+-      mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_ind.length() - 1,
+-                "%s", scroll_ind.c_str());
+-    }
+-    wrefresh(chat_win_);
+-  }
++void ChatScreen::draw_chat() {
++  werase(chat_win_);
++  box(chat_win_, 0, 0);
++  const int kVisibleLine = getmaxy(chat_win_) - 2;
++  int start_idx = std::max(0, static_cast<int>
++                           (messages_.size() - kVisibleLine - scroll_position_));
++  for (int idx = 0; idx < kVisibleLine; ++idx) {
++    int message_idx = start_idx + idx;
++    if (message_idx >= static_cast<int>(messages_.size())) {
++      break;
++    }
++    const auto& message = messages_[message_idx];
++    wattron(chat_win_, COLOR_PAIR(message.is_reply ? ACTIVE_PAIR : DEFAULT_PAIR));
++    int line = idx + 1;
++    size_t pos = 0;
++    while (pos < message.text.length() && line < kVisibleLine) {
++      size_t end = message.text.find('\n', pos);
++      if (end == std::string::npos) {
++        end = message.text.length();
++      }
++      mvwprintw(chat_win_, line++, 2, "%.*s", static_cast<int>(end - pos),
++                message.text.c_str() + pos);
++      pos = end + 1;
++    }
++    wattroff(chat_win_, COLOR_PAIR(message.is_reply ? ACTIVE_PAIR : DEFAULT_PAIR));
++  }
++  if (scroll_position_ > 0 ||
++      start_idx + kVisibleLine < static_cast<int>(messages_.size())) {
++    std::string scroll_title = "^ " + std::to_string(scroll_position_ + 1)
++                               + "/" + std::to_string(messages_.size())
++                               + " v";
++    mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_title.length() - 1,
++              "%s", scroll_title.c_str());
++  }
++  wrefresh(chat_win_);
++}
+ 
+-  WINDOW* contacts_win_;
+-  WINDOW* input_win_;
+-  WINDOW* chat_win_;
+-  std::string host_;
+-  std::string port_;
+-  std::string status_;
+-  std::string current_input_;
+-  std::vector<std::pair<std::string, bool>> messages_;
+-  char last_request_[max_length]{};
+-  const size_t max_messages_{1000};
+-  int scroll_position_{0};
+-};
++void ChatScreen::draw_input_field() {
++  werase(input_win_);
++  box(input_win_, 0, 0);
++  mvwprintw(input_win_, 1, 2, "> %s", current_input_.c_str());
++  wmove(input_win_, 1, 2 + current_input_.length() + 1);
++  wrefresh(input_win_);
++}
++
++void ChatScreen::draw_layout() {
++  draw_contacts();
++  draw_chat();
++  draw_input_field();
++  wrefresh(main_win_);
++}
+ 
+-#endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_CHAT_SCREEN_HPP_
++ChatScreen::~ChatScreen() {
++  delwin(contacts_win_);
++  delwin(chat_win_);
++  delwin(input_win_);
++}
++
++#endif //SWIFTMESSAGE_INCLUDE_SCREEN_HANDLER_CHAT_SCREEN_HPP_

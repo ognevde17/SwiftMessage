@@ -1,0 +1,2 @@
+/home/sheyme/github/SwiftMessage/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/sheyme/github/SwiftMessage/cmake-build-debug/CMakeFiles/rebuild_cache.dir
