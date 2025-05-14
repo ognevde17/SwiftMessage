@@ -2,8 +2,6 @@
 
 build/*
 
-cmake-build-debug/
-
 build-client/*
 
 build-server/*
