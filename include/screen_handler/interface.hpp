@@ -22,7 +22,7 @@ class Interface {
 
   static Result RenderGreeting();
 
-  Result RenderAR(bool is_registration = false, const std::string& status = "",
+  Result RenderAR(const std::string& status = "",
                   ColorPairs color = ACTIVE_PAIR);
   [[nodiscard]] UserData GetUserData() const { return user_data_; }
 
@@ -49,10 +49,14 @@ class Interface {
 
   static void SetupColors();
 
+  void InitAR();
+  void SetARStatus(std::string status, ColorPairs color);
+
   UserData user_data_;
   SignScreen* sign_screen_{nullptr};
   ChatScreen* chat_screen_{nullptr};
   static bool ncurses_initialized;
+  static bool registration_state;
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_INTERFACE_HPP_

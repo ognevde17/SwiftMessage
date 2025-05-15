@@ -6,34 +6,26 @@
 #include <iostream>
 
 #include "../../include/screen_handler/interface.hpp"
-#include "utils.hpp"
+#include "./utils.hpp"
 
 bool Interface::ncurses_initialized = false;
+bool Interface::registration_state = false;
 
 int main() {
   try {
     Interface interface;
 
-    Result state = Result::None;
-    bool is_registration = false;
-    while (true) {
-      state = Interface::RenderGreeting();
-      if (state == Result::Register) {
-        is_registration = true;
-        break;
-      }
-      if (state == Result::Login) {
-        break;
-      }
+    if (Interface::RenderGreeting() == Result::Exit) {
+      return 0;
     }
 
+    std::string status;
+    ColorPairs color = ACTIVE_PAIR;
     while (true) {
-      state = interface.RenderAR(is_registration,
-                                 is_registration ? "Registration" : "Authentication");
-//      state = interface.RenderAR(false, "Registration achieved");
-//      state = interface.RenderAR(true, "Error due registration", SYSTEM_NOTIFICATION_PAIR);
+      Result state = interface.RenderAR(status, color);
       if (state == Result::Register) {
-        continue;
+        status = "Registration achieved";
+//        color = SYSTEM_NOTIFICATION_PAIR;
       }
       if (state == Result::Login || state == Result::Exit) {
         break;

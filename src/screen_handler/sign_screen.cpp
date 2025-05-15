@@ -39,6 +39,16 @@ void SignScreen::switch_screen() {
   refresh();
 }
 
+void SignScreen::update_screen(bool registration_state,
+                               const std::string& status, ColorPairs color) {
+  if (registration_state != is_registration_ && color != SYSTEM_NOTIFICATION_PAIR) {
+    switch_screen();
+  }
+  status_message_ = status.empty() ? status_message_ : status;
+  status_color_ = color;
+  refresh();
+}
+
 SignScreen::Result SignScreen::handle_input() {
   int ch = wgetch(content_win_);
   switch (ch) {

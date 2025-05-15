@@ -19,9 +19,10 @@ class SignScreen : public AbstractScreen {
   std::string get_login() const { return login_; }
   std::string get_password() const { return password_; }
 
-  void switch_screen();
-
   void refresh() override;
+
+  void update_screen(bool registration_state, const std::string& status = "",
+                     ColorPairs color = ACTIVE_PAIR);
 
   Result handle_input();
 
@@ -38,6 +39,8 @@ class SignScreen : public AbstractScreen {
   Result handle_submit();
 
   void move_cursor(int direction);
+
+  void switch_screen();
 
   std::string* get_current_field();
 

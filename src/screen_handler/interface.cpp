@@ -15,16 +15,29 @@ Result Interface::RenderGreeting() {
   while (true) {
     auto state = greeting_screen.handle_input();
     if (state != Result::None) {
-      return state;
+      registration_state = state == Result::Register;
+      break;
     }
   }
-  return Result ::None;
 }
 
-Result Interface::RenderAR(bool is_registration, const std::string& status,
-                           ColorPairs color) {
-  delete sign_screen_;
-  sign_screen_ = new SignScreen(is_registration, status, color);
+void Interface::InitAR() {
+  if (sign_screen_ == nullptr) {
+    std::string status = registration_state ? "Registration" : "Authentication";
+    sign_screen_ = new SignScreen(registration_state, status, ACTIVE_PAIR);
+  }
+}
+
+void Interface::SetARStatus(std::string status, ColorPairs color) {
+  if (status.empty()) {
+    status = registration_state ? "Registration" : "Authentication";
+  }
+  sign_screen_-> update_screen(registration_state, status, color);
+}
+
+Result Interface::RenderAR(const std::string& status, ColorPairs color) {
+  InitAR();
+  SetARStatus(status, color);
   bool is_submitted = false;
   Result state;
   while (!is_submitted) {
@@ -34,6 +47,7 @@ Result Interface::RenderAR(bool is_registration, const std::string& status,
         is_submitted = true;
         break;
       case Result::Register:
+        registration_state = false;
         is_submitted = true;
         break;
       case Result::Exit:
