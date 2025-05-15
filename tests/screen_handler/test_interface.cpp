@@ -15,9 +15,7 @@ int main() {
   try {
     Interface interface;
 
-    if (Interface::RenderGreeting() == Result::Exit) {
-      return 0;
-    }
+    Interface::RenderGreeting();
 
     std::string status;
     ColorPairs color = ACTIVE_PAIR;
@@ -25,7 +23,7 @@ int main() {
       Result state = interface.RenderAR(status, color);
       if (state == Result::Register) {
         status = "Registration achieved";
-//        color = SYSTEM_NOTIFICATION_PAIR;
+        color = SYSTEM_NOTIFICATION_PAIR;
       }
       if (state == Result::Login || state == Result::Exit) {
         break;

@@ -16,7 +16,7 @@ Result Interface::RenderGreeting() {
     auto state = greeting_screen.handle_input();
     if (state != Result::None) {
       registration_state = state == Result::Register;
-      break;
+      return state;
     }
   }
 }
