@@ -7,8 +7,8 @@
 
 SignScreen::SignScreen(bool is_registration, const std::string& status,
                        ColorPairs color)
-    : AbstractScreen(), is_registration_(is_registration),
-      status_message_(status), status_color_(color) {
+    : is_registration_(is_registration), status_message_(status),
+      status_color_(color) {
   post_create();
   refresh();
 }

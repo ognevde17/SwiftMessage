@@ -13,22 +13,23 @@
 
 namespace testing_data {
 const int kMessagesCount = 40;
+const int kMessagesUpdateCount = 10;
 const size_t kBaseMessageLength = 10;
+const char kAlphanum[] =
+    "0123456789"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "abcdefghijklmnopqrstuvwxyz";
 }
 
 namespace utils {
 std::string GenerateRandomString(
     size_t length = testing_data::kBaseMessageLength) {
-  static const char kAlphanum[] =
-      "0123456789"
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-      "abcdefghijklmnopqrstuvwxyz";
   static std::mt19937 gen(std::time(nullptr));
-  std::uniform_int_distribution<> dis(0, sizeof(kAlphanum) - 2);
+  std::uniform_int_distribution<> dis(0, sizeof(testing_data::kAlphanum) - 2);
   std::string string;
   string.reserve(length);
   for (size_t idx = 0; idx < length; ++idx) {
-    string += kAlphanum[dis(gen)];
+    string += testing_data::kAlphanum[dis(gen)];
   }
   return string;
 }

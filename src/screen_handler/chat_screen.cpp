@@ -4,7 +4,7 @@
 
 #include "../../include/screen_handler/chat_screen.hpp"
 
-ChatScreen::ChatScreen() : AbstractScreen() {
+ChatScreen::ChatScreen() {
   create_windows();
   post_create();
   refresh();

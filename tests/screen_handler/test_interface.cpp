@@ -47,8 +47,9 @@ int main() {
         interface.ClearChat();
       }
       if (user_input == "random") {
-        messages = utils::GenerateRandomMessages(testing_data::kMessagesCount);
-        interface.UpdateMessages(messages);
+        messages = utils::GenerateRandomMessages(
+            testing_data::kMessagesUpdateCount);
+        interface.AddMessagesUpdate(messages);
       }
       if (user_input == "error") {
         interface.DisplayError("Testing error");
