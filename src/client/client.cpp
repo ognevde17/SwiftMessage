@@ -77,7 +77,7 @@ void Client::Receive() {
       //std::cout << "OK2\n";
       SendMessageRequest data = SendMessageRequest::from_string(received);
       if (!data.message_text.empty()) {
-        interface_.ShowMessage(data.sender_login, data.message_text);
+        interface_.DisplayMessage(data.sender_login, data.message_text);
       }
       //std::cout << "OK3\n";
     } catch (const boost::system::system_error& e) {
@@ -103,20 +103,23 @@ void Client::StartReceive() {
 
 bool Client::Authenticate() {
   std::cout << "auth\n";
-  interface_.RenderAR();
   auto data = interface_.GetUserData();
   try {
+    std::cout << "t1\n";
     if (connection_.SendAuthRequest(data.login, data.password)) {
+      std::cout << "t2\n";
       user_login_ = data.login;
       is_auth_ = true;
       std::cout << "SUCCESS" << std::endl;
       //interface_.DisplayAnnouncement("Аутентификация успешна");
       return true;
     } else {
+      std::cout << "FAIL\n";
       //interface_.ShowError("Ошибка аутентификации");
       return false;
     }
   } catch (...) {
+    std::cout << "FAIL2\n";
     //interface_.ShowError("Ошибка при аутентификации");
     return false;
   }
@@ -124,12 +127,13 @@ bool Client::Authenticate() {
 
 bool Client::Register() {
   //interface_.RenderAR();
-  auto credentials = interface_.GetRegistrationCredentials();
+  std::cout << "REG\n";
+  auto data = interface_.GetUserData();
   try {
-    std::string answer = connection_.SendRegRequest(credentials.login, 
-                                                 credentials.password);
+    std::string answer = connection_.SendRegRequest(data.login, 
+                                                 data.password);
     if (answer == "You have successfully registered") {
-      user_login_ = credentials.login;
+      user_login_ = data.login;
       //interface_.DisplayAnnouncement("Регистрация успешна");
       return true;
     } else if (answer == "ERROR1") {
@@ -147,17 +151,38 @@ bool Client::Register() {
 
 void Client::Run() {
   if (!Connect()) return;
-  interface_.RenderGreeting();
+  Result state = Result::None;
+  bool is_registration = false;
+  std::cout << "XYI\n";
+  Interface::RenderGreeting();
+  std::string status;
+  ColorPairs color = ACTIVE_PAIR;
+  
   while (!is_auth_) {
-    
+    auto state = interface_.RenderAR(status, color);
+    if (state == Result::Register) {
+      std::cerr << "OK1111\n";
+      if (Register()) {
+        status = "Registration achieved";
+      } else {
+        status = "Registration failed";
+        color = SYSTEM_NOTIFICATION_PAIR;
+      }
+      continue;
+    } else if (state == Result::Login){
+      std::cout << "OK22222\n";
+      if (!Authenticate()) {
+        status = "Authenticate failed";
+        color = SYSTEM_NOTIFICATION_PAIR;
+      }
+      continue;
 
-    auto auth_choice = interface_.GetAuthChoice();
-    if (auth_choice == AuthChoice::Register) {
-      Register();
-    } else {
-      Authenticate();
     }
+    status.clear();
+    
   }
+    
+    
 
   auto recipient = interface_.GetRecipientLogin();
   interface_.RenderChat();

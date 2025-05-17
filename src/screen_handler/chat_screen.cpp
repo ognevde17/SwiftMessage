@@ -38,12 +38,16 @@ void ChatScreen::update_username(const std::string& username) {
   username_ = username;
 }
 
-void ChatScreen::update_messages(std::vector<Message>&& messages) {
+void ChatScreen::load_messages(std::vector<Message>&& messages) {
   messages_ = std::move(messages);
 }
 
-void ChatScreen::update_messages(const std::vector<Message>& messages) {
+void ChatScreen::load_messages(const std::vector<Message>& messages) {
   messages_ = messages;
+}
+
+void ChatScreen::add_messages_update(const std::vector<Message>& messages) {
+  messages_.insert(messages_.end(), messages.begin(), messages.end());
 }
 
 std::string ChatScreen::get_current_input() {
@@ -75,7 +79,6 @@ ChatScreen::Result ChatScreen::handle_input() {
     case KEY_ENTER:
       refresh();
       return Result::NewMessage;
-
     default:
       handle_char(ch);
       return Result::None;
@@ -86,11 +89,11 @@ std::string ChatScreen::wrap_text(const std::string& text, int width) {
   std::string result;
   size_t line_start = 0;
   size_t last_space = 0;
-  for (size_t i = 0; i < text.size(); ++i) {
-    if (text[i] == ' ') {
-      last_space = i;
+  for (size_t idx = 0; idx < text.size(); ++idx) {
+    if (text[idx] == ' ') {
+      last_space = idx;
     }
-    if (i - line_start >= static_cast<size_t>(width)) {
+    if (idx - line_start >= static_cast<size_t>(width)) {
       if (last_space > line_start) {
         result += text.substr(line_start, last_space - line_start) + '\n';
         line_start = last_space + 1;
@@ -128,7 +131,7 @@ void ChatScreen::handle_char(int ch) {
     if (!current_input_.empty()) {
       current_input_.pop_back();
     }
-  } else if (isprint(ch)) {
+  } else if (isprint(ch) != 0) {
     current_input_ += static_cast<char>(ch);
   }
   draw_input_field();
@@ -194,7 +197,8 @@ void ChatScreen::draw_chat() {
   int start_msg = std::max(0, scroll_position_);
   int end_msg = std::min(start_msg + getmaxy(chat_win_) - 2,
                          static_cast<int>(messages_.size()));
-  for (int idx = start_msg; idx < end_msg && col < getmaxy(chat_win_) - 1; ++idx) {
+  for (int idx = start_msg; idx < end_msg && col < getmaxy(chat_win_) - 1;
+       ++idx) {
     const auto& message = messages_[idx];
     apply_color(chat_win_, message.type, true);
     size_t pos = 0;

@@ -33,6 +33,13 @@ struct Format {
 
 class AbstractScreen {
  public:
+  enum class Result {
+    None,
+    Login,
+    Register,
+    Exit
+  };
+
   void display_message(const std::string& message);
 
   virtual void refresh();
