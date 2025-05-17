@@ -31,13 +31,18 @@ void AbstractScreen::create_windows() {
 void AbstractScreen::post_create() { wrefresh(main_win_); }
 
 Format AbstractScreen::get_format(const ColorPairs& pair) {
-  static const std::unordered_map<ColorPairs, Format> format_map = {
+  static const std::unordered_map<ColorPairs, Format> kFormatMap = {
       {DEFAULT_PAIR, {DEFAULT_PAIR, TextAttribute::NORMAL}},
       {ACTIVE_PAIR, {ACTIVE_PAIR, TextAttribute::BOLD}},
       {SYSTEM_NOTIFICATION_PAIR,
-       {SYSTEM_NOTIFICATION_PAIR, TextAttribute::BLINK}}
+       {SYSTEM_NOTIFICATION_PAIR, TextAttribute::BLINK}},
+      {SENDER_PAIR, {SENDER_PAIR, TextAttribute::REVERSE}}
   };
-  return format_map.at(pair);
+  auto iter = kFormatMap.find(pair);
+  if (iter == kFormatMap.end()) {
+    return {DEFAULT_PAIR, TextAttribute::NORMAL};
+  }
+  return iter->second;
 }
 
 void AbstractScreen::apply_color(WINDOW* win, const ColorPairs& pair,

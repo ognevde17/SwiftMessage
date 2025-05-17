@@ -56,6 +56,7 @@ set(INTERFACE_SOURCES
     ${PROJECT_SOURCE_DIR}/src/screen_handler/sign_screen.cpp
     ${PROJECT_SOURCE_DIR}/src/screen_handler/send_screen.cpp
     ${PROJECT_SOURCE_DIR}/src/screen_handler/chat_screen.cpp
+    ${PROJECT_SOURCE_DIR}/src/screen_handler/popup.cpp
 )
 
 if (BUILD_SERVER)

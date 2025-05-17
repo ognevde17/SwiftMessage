@@ -6,6 +6,7 @@
 #define SWIFTMESSAGE_SRC_SCREEN_HANDLER_GREETING_SCREEN_HPP_
 
 #include "abstract_screen.hpp"
+#include "pop_up.hpp"
 
 class GreetingScreen : public AbstractScreen {
  public:
@@ -23,8 +24,11 @@ class GreetingScreen : public AbstractScreen {
  private:
   void handle_resize();
 
+  Result handle_popup(char ch);
+
   void draw_ui();
 
+  ColorPopUp color_popup_;
   int current_field_{0};
 };
 
