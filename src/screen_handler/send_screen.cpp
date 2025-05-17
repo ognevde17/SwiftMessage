@@ -4,7 +4,7 @@
 
 #include "../../include/screen_handler/send_screen.hpp"
 
-SendScreen::SendScreen() : AbstractScreen() {
+SendScreen::SendScreen() {
   keypad(content_win_, true);
   refresh();
 }
@@ -54,7 +54,7 @@ AbstractScreen::Result SendScreen::handle_input() {
       refresh();
       return Result::None;
     default:
-      if (isprint(ch) && current_input_.length() < 30) {
+      if ((isprint(ch) != 0) && current_input_.length() < 30) {
         current_input_ += static_cast<char>(ch);
         refresh();
       }

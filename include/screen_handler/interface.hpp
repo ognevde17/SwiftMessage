@@ -41,6 +41,7 @@ class Interface {
   void DisplayError(const std::string& message);
   void DisplayMessage(const std::string& sender, const std::string& message);
 
+  static std::string GetSender() { return sender_login; }
   std::string GetInputMessage();
 
   void ClearChat();
@@ -57,13 +58,14 @@ class Interface {
   void StopChatLoop();
   void ResumeChatLoop();
 
+  static std::string sender_login;
+  static bool ncurses_initialized;
+  static bool registration_state;
+
   UserData user_data_;
   SignScreen* sign_screen_{nullptr};
   ChatScreen* chat_screen_{nullptr};
-  static std::string sender_login;
   std::vector<Message> chat_backup_;
-  static bool ncurses_initialized;
-  static bool registration_state;
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_INTERFACE_HPP_

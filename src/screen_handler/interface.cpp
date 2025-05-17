@@ -51,7 +51,7 @@ Result Interface::RenderAR(const std::string& status, ColorPairs color) {
         is_submitted = true;
         break;
       case Result::Exit:
-        is_submitted = true;  // Just exit
+        is_submitted = true;
         break;
       case Result::None:
         break;
@@ -73,7 +73,7 @@ void Interface::StopChatLoop() {
 
 void Interface::ResumeChatLoop() {
   RenderChat();
-  chat_screen_->add_messages_update(chat_backup_);
+  chat_screen_->add_messages_update(std::move(chat_backup_));
 }
 
 std::string Interface::RenderSendGetter(bool was_running) {
