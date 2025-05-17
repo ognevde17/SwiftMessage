@@ -8,6 +8,7 @@
 
 #include "greeting_screen.hpp"
 #include "sign_screen.hpp"
+#include "send_screen.hpp"
 #include "chat_screen.hpp"
 
 struct UserData {
@@ -22,9 +23,11 @@ class Interface {
 
   static Result RenderGreeting();
 
-  Result RenderAR(bool is_registration = false, const std::string& status = "",
+  Result RenderAR(const std::string& status = "",
                   ColorPairs color = ACTIVE_PAIR);
   [[nodiscard]] UserData GetUserData() const { return user_data_; }
+
+  std::string RenderSendGetter(bool was_running = false);
 
   void RenderChat();
   void RenderChat(std::vector<Message>&& messages);
@@ -38,7 +41,7 @@ class Interface {
   void DisplayError(const std::string& message);
   void DisplayMessage(const std::string& sender, const std::string& message);
 
-  std::string GetSenderLogin();
+  static std::string GetSender() { return sender_login; }
   std::string GetInputMessage();
 
   void ClearChat();
@@ -49,10 +52,20 @@ class Interface {
 
   static void SetupColors();
 
+  void InitAR();
+  void SetARStatus(std::string status, ColorPairs color);
+
+  void StopChatLoop();
+  void ResumeChatLoop();
+
+  static std::string sender_login;
+  static bool ncurses_initialized;
+  static bool registration_state;
+
   UserData user_data_;
   SignScreen* sign_screen_{nullptr};
   ChatScreen* chat_screen_{nullptr};
-  static bool ncurses_initialized;
+  std::vector<Message> chat_backup_;
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_INTERFACE_HPP_

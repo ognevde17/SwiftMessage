@@ -15,16 +15,29 @@ Result Interface::RenderGreeting() {
   while (true) {
     auto state = greeting_screen.handle_input();
     if (state != Result::None) {
+      registration_state = state == Result::Register;
       return state;
     }
   }
-  return Result ::None;
 }
 
-Result Interface::RenderAR(bool is_registration, const std::string& status,
-                           ColorPairs color) {
-  delete sign_screen_;
-  sign_screen_ = new SignScreen(is_registration, status, color);
+void Interface::InitAR() {
+  if (sign_screen_ == nullptr) {
+    std::string status = registration_state ? "Registration" : "Authentication";
+    sign_screen_ = new SignScreen(registration_state, status, ACTIVE_PAIR);
+  }
+}
+
+void Interface::SetARStatus(std::string status, ColorPairs color) {
+  if (status.empty()) {
+    status = registration_state ? "Registration" : "Authentication";
+  }
+  sign_screen_-> update_screen(registration_state, status, color);
+}
+
+Result Interface::RenderAR(const std::string& status, ColorPairs color) {
+  InitAR();
+  SetARStatus(status, color);
   bool is_submitted = false;
   Result state;
   while (!is_submitted) {
@@ -34,10 +47,11 @@ Result Interface::RenderAR(bool is_registration, const std::string& status,
         is_submitted = true;
         break;
       case Result::Register:
+        registration_state = false;
         is_submitted = true;
         break;
       case Result::Exit:
-        is_submitted = true;  // Just exit
+        is_submitted = true;
         break;
       case Result::None:
         break;
@@ -50,10 +64,39 @@ Result Interface::RenderAR(bool is_registration, const std::string& status,
   return state;
 }
 
+void Interface::StopChatLoop() {
+  if (chat_screen_ != nullptr) {
+    chat_backup_ = chat_screen_->get_chat();
+  }
+  delete chat_screen_;
+}
+
+void Interface::ResumeChatLoop() {
+  RenderChat();
+  chat_screen_->add_messages_update(std::move(chat_backup_));
+}
+
+std::string Interface::RenderSendGetter(bool was_running) {
+  if (was_running) {
+    StopChatLoop();
+  }
+  SendScreen send_screen;
+  while (true) {
+    auto state = send_screen.handle_input();
+    if (state == Result::Login) {
+      sender_login = send_screen.get_sender_name();
+      if (was_running) {
+        ResumeChatLoop();
+      }
+      return sender_login;
+    }
+  }
+}
+
 void Interface::RenderChat() {
   chat_screen_ = new ChatScreen();
+  chat_screen_->update_status(sender_login);
   chat_screen_->update_username(user_data_.login);
-  // TODO(Sheyme): потом сюда юзернейм кидать, а не логин
   chat_screen_->refresh();
 }
 
@@ -97,10 +140,14 @@ void Interface::DisplayMessage(const std::string& sender,
 
 std::string Interface::GetInputMessage() {
   while (true) {
-    if (chat_screen_->handle_input() == ChatScreen::Result::NewMessage) {
+    auto state = chat_screen_->handle_input();
+    if (state == ChatScreen::Result::NewMessage) {
       auto input = chat_screen_->get_current_input();
       chat_screen_->add_message(input);
       return input;
+    }
+    if (state == ChatScreen::Result::SendChoice) {
+      return "[[SEND]]";
     }
   }
 }

@@ -25,7 +25,7 @@ class GreetingScreen : public AbstractScreen {
 
   void draw_ui();
 
-  int current_field{1};
+  int current_field_{0};
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_GREETING_SCREEN_HPP_

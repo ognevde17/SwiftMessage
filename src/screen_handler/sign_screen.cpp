@@ -7,8 +7,8 @@
 
 SignScreen::SignScreen(bool is_registration, const std::string& status,
                        ColorPairs color)
-    : AbstractScreen(), is_registration_(is_registration),
-      status_message_(status), status_color_(color) {
+    : is_registration_(is_registration), status_message_(status),
+      status_color_(color) {
   post_create();
   refresh();
 }
@@ -36,6 +36,16 @@ void SignScreen::switch_screen() {
   clear_fields();
   current_field_ = 0;
   swap_status();
+  refresh();
+}
+
+void SignScreen::update_screen(bool registration_state,
+                               const std::string& status, ColorPairs color) {
+  if (registration_state != is_registration_ && color != SYSTEM_NOTIFICATION_PAIR) {
+    switch_screen();
+  }
+  status_message_ = status.empty() ? status_message_ : status;
+  status_color_ = color;
   refresh();
 }
 

@@ -10,7 +10,7 @@ AbstractScreen::AbstractScreen() {
 }
 
 void AbstractScreen::display_message(const std::string &message) {
-  if (++row_number > static_cast<size_t>(LINES - 2)) {
+  if (++row_number_ > static_cast<size_t>(LINES - 2)) {
     scroll(content_win_);
   }
   wprintw(content_win_, "%s\n", message.c_str());

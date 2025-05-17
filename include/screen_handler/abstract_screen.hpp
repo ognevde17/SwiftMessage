@@ -62,7 +62,7 @@ class AbstractScreen {
 
   WINDOW* main_win_;
   WINDOW* content_win_;
-  size_t row_number{0};
+  size_t row_number_{0};
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_ABSTRACT_SCREEN_HPP_
