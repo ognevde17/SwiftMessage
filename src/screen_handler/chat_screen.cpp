@@ -34,6 +34,10 @@ void ChatScreen::refresh() {
   draw_layout();
 }
 
+void ChatScreen::update_status(const std::string& sender) {
+  status_ = sender;
+}
+
 void ChatScreen::update_username(const std::string& username) {
   username_ = username;
 }
@@ -48,6 +52,8 @@ void ChatScreen::load_messages(const std::vector<Message>& messages) {
 
 void ChatScreen::add_messages_update(const std::vector<Message>& messages) {
   messages_.insert(messages_.end(), messages.begin(), messages.end());
+  scroll_position_ =
+      std::max(0, static_cast<int>(messages_.size()) - getmaxy(chat_win_) + 2);
 }
 
 std::string ChatScreen::get_current_input() {
@@ -71,6 +77,8 @@ ChatScreen::Result ChatScreen::handle_input() {
     case 9:
       handle_scroll(1);
       return Result::Scroll;
+    case KEY_LEFT:
+      return Result::SendChoice;
     case 27:
       return Result::Exit;
     case '\n':
@@ -174,8 +182,11 @@ void ChatScreen::draw_contacts() {
   apply_color(contacts_win_, DEFAULT_PAIR, true);
   mvwprintw(contacts_win_, 0, (getmaxx(contacts_win_) - username_.length()) / 2,
             "%s", username_.c_str());
+  std::string prompt = "Chat with:";
+  mvwprintw(contacts_win_, 2, (getmaxx(contacts_win_) - prompt.length()) / 2,
+            "%s", prompt.c_str());
   apply_color(contacts_win_, DEFAULT_PAIR, false);
-  int line = 2;
+  int line = 4;
   size_t start = 0;
   while (start < status_.length() && line < static_cast<size_t>
                                          (getmaxy(contacts_win_) - 1)) {
@@ -183,7 +194,8 @@ void ChatScreen::draw_contacts() {
     if (end == std::string::npos) {
       end = status_.length();
     }
-    mvwprintw(contacts_win_, line++, 2, "%.*s",
+    mvwprintw(contacts_win_, line++,
+              (getmaxx(contacts_win_) - status_.length()) / 2, "%.*s",
               static_cast<int>(end - start), status_.c_str() + start);
     start = end + 1;
   }

@@ -64,10 +64,39 @@ Result Interface::RenderAR(const std::string& status, ColorPairs color) {
   return state;
 }
 
+void Interface::StopChatLoop() {
+  if (chat_screen_ != nullptr) {
+    chat_backup_ = chat_screen_->get_chat();
+  }
+  delete chat_screen_;
+}
+
+void Interface::ResumeChatLoop() {
+  RenderChat();
+  chat_screen_->add_messages_update(chat_backup_);
+}
+
+std::string Interface::RenderSendGetter(bool was_running) {
+  if (was_running) {
+    StopChatLoop();
+  }
+  SendScreen send_screen;
+  while (true) {
+    auto state = send_screen.handle_input();
+    if (state == Result::Login) {
+      sender_login = send_screen.get_sender_name();
+      if (was_running) {
+        ResumeChatLoop();
+      }
+      return sender_login;
+    }
+  }
+}
+
 void Interface::RenderChat() {
   chat_screen_ = new ChatScreen();
+  chat_screen_->update_status(sender_login);
   chat_screen_->update_username(user_data_.login);
-  // TODO(Sheyme): потом сюда юзернейм кидать, а не логин
   chat_screen_->refresh();
 }
 
@@ -111,10 +140,14 @@ void Interface::DisplayMessage(const std::string& sender,
 
 std::string Interface::GetInputMessage() {
   while (true) {
-    if (chat_screen_->handle_input() == ChatScreen::Result::NewMessage) {
+    auto state = chat_screen_->handle_input();
+    if (state == ChatScreen::Result::NewMessage) {
       auto input = chat_screen_->get_current_input();
       chat_screen_->add_message(input);
       return input;
+    }
+    if (state == ChatScreen::Result::SendChoice) {
+      return "[[SEND]]";
     }
   }
 }
