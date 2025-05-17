@@ -49,7 +49,7 @@ void SignScreen::update_screen(bool registration_state,
   refresh();
 }
 
-SignScreen::Result SignScreen::handle_input() {
+Result SignScreen::handle_input() {
   int ch = wgetch(content_win_);
   switch (ch) {
     case (KEY_RESIZE): {
@@ -67,13 +67,6 @@ SignScreen::Result SignScreen::handle_input() {
     case ('\n') :
     case (KEY_ENTER): {
       return handle_submit();
-    }
-    case (27) : {
-      return Result::Exit;
-    }
-    case (9): {
-      move_cursor(1);
-      return Result::None;
     }
     default: {
       handle_char(ch);

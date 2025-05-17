@@ -5,9 +5,9 @@
 #ifndef SWIFTMESSAGE_INCLUDE_SCREEN_HANDLER_CHAT_SCREEN_HPP_
 #define SWIFTMESSAGE_INCLUDE_SCREEN_HANDLER_CHAT_SCREEN_HPP_
 
-#include "abstract_screen.hpp"
-
 #include <vector>
+
+#include "abstract_screen.hpp"
 
 struct Message {
   Message() = default;

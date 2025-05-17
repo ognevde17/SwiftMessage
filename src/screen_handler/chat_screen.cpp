@@ -74,13 +74,8 @@ ChatScreen::Result ChatScreen::handle_input() {
     case KEY_DOWN:
       handle_scroll(1);
       return Result::Scroll;
-    case 9:
-      handle_scroll(1);
-      return Result::Scroll;
     case KEY_LEFT:
       return Result::SendChoice;
-    case 27:
-      return Result::Exit;
     case '\n':
       refresh();
       return Result::NewMessage;
