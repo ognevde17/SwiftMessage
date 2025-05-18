@@ -57,7 +57,7 @@ void RequestManager::HandleAuthRequest(DatabaseManager& database_manager,
 
   int user_id = database_manager.GetClientIdByLogin(auth_request.login);
   AssociateUserIdWithConnectionId(user_id, connection_id);
-
+  std::cout << "Registered successfully" << std::endl;
   ConnectionManager::SendData(connection_id,
                               ServerResponse("AUTH_SUCCESS").to_string());
 }
