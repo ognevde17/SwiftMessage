@@ -9,7 +9,7 @@ AbstractScreen::AbstractScreen() {
   post_create();
 }
 
-void AbstractScreen::display_message(const std::string &message) {
+void AbstractScreen::display_message(const std::string& message) {
   if (++row_number_ > static_cast<size_t>(LINES - 2)) {
     scroll(content_win_);
   }
@@ -24,7 +24,7 @@ void AbstractScreen::refresh() {
 
 void AbstractScreen::create_windows() {
   main_win_ = newwin(LINES, COLS, 0, 0);
-  content_win_ = derwin(main_win_, LINES-2, COLS-2, 1, 1);
+  content_win_ = derwin(main_win_, LINES - 2, COLS - 2, 1, 1);
   scrollok(content_win_, true);
 }
 
@@ -36,8 +36,7 @@ Format AbstractScreen::get_format(const ColorPairs& pair) {
       {ACTIVE_PAIR, {ACTIVE_PAIR, TextAttribute::BOLD}},
       {SYSTEM_NOTIFICATION_PAIR,
        {SYSTEM_NOTIFICATION_PAIR, TextAttribute::BLINK}},
-      {SENDER_PAIR, {SENDER_PAIR, TextAttribute::REVERSE}}
-  };
+      {SENDER_PAIR, {SENDER_PAIR, TextAttribute::REVERSE}}};
   auto iter = kFormatMap.find(pair);
   if (iter == kFormatMap.end()) {
     return {DEFAULT_PAIR, TextAttribute::NORMAL};
@@ -71,23 +70,22 @@ void AbstractScreen::draw_button(WINDOW* win, int x, int y, ColorPairs color,
   int button_start_y = y + 1;
   apply_color(win, color, true);
   mvwaddch(win, button_start_y, button_start_x, ACS_ULCORNER);
-  mvwhline(win, button_start_y, button_start_x + 1,
-           ACS_HLINE, button_width - 2);
+  mvwhline(win, button_start_y, button_start_x + 1, ACS_HLINE,
+           button_width - 2);
   mvwaddch(win, button_start_y, button_start_x + button_width - 1,
            ACS_URCORNER);
   for (int idx = 1; idx < button_height - 1; ++idx) {
     mvwaddch(win, button_start_y + idx, button_start_x, ACS_VLINE);
-    mvwaddch(win, button_start_y + idx,
-             button_start_x + button_width - 1, ACS_VLINE);
+    mvwaddch(win, button_start_y + idx, button_start_x + button_width - 1,
+             ACS_VLINE);
   }
-  mvwaddch(win, button_start_y + button_height - 1,
-           button_start_x, ACS_LLCORNER);
+  mvwaddch(win, button_start_y + button_height - 1, button_start_x,
+           ACS_LLCORNER);
   mvwhline(win, button_start_y + button_height - 1, button_start_x + 1,
            ACS_HLINE, button_width - 2);
   mvwaddch(win, button_start_y + button_height - 1,
            button_start_x + button_width - 1, ACS_LRCORNER);
-  mvwprintw(win, button_start_y + 1,
-            x - static_cast<int>(label.length()) / 2,
+  mvwprintw(win, button_start_y + 1, x - static_cast<int>(label.length()) / 2,
             "%s", label.c_str());
   apply_color(win, color, false);
 }

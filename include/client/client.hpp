@@ -3,7 +3,7 @@
 #include <thread>
 
 #include "connection_manager.hpp"
-#include "interface.hpp"
+#include "../screen_handler/interface.hpp"
 
 class ClientThread;
 

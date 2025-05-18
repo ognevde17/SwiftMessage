@@ -68,6 +68,13 @@ Result SignScreen::handle_input() {
     case (KEY_ENTER): {
       return handle_submit();
     }
+    case (27) : {
+      return Result::Exit;
+    }
+    case (9): {
+      move_cursor(1);
+      return Result::None;
+    }
     default: {
       handle_char(ch);
       return Result::None;

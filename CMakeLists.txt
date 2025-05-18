@@ -29,7 +29,7 @@ if (BUILD_SERVER OR BUILD_DB_TEST OR BUILD_INTEGRATION_TESTS)
   include_directories(${PostgreSQL_INCLUDE_DIRS})
 endif()
 
-if (BUILD_INTERFACE_TEST)
+if (BUILD_CLIENT OR BUILD_INTERFACE_TEST)
     find_package(Curses REQUIRED)
 endif ()
 
@@ -45,7 +45,7 @@ set(SERVER_SOURCES
 set(CLIENT_SOURCES
     ${PROJECT_SOURCE_DIR}/src/client/client.cpp
     ${PROJECT_SOURCE_DIR}/src/client/connection_manager.cpp
-    ${PROJECT_SOURCE_DIR}/src/client/interface.cpp
+    # ${PROJECT_SOURCE_DIR}/src/client/interface.cpp
 )
 
 # ── interface ──────────────────────────────────────────
@@ -79,6 +79,7 @@ if (BUILD_CLIENT)
     add_executable(${CLIENT_NAME}
         ${PROJECT_SOURCE_DIR}/src/client/main.cpp
         ${CLIENT_SOURCES}
+        ${INTERFACE_SOURCES}
     )
 
     target_link_libraries(${CLIENT_NAME}
@@ -86,6 +87,12 @@ if (BUILD_CLIENT)
         Boost::system
         Boost::thread
         Boost::serialization
+        ${CURSES_LIBRARIES}
+    )
+
+    target_include_directories(${CLIENT_NAME}
+    PRIVATE
+      ${CURSES_INCLUDE_DIR}
     )
 endif()
 

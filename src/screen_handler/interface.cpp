@@ -5,6 +5,11 @@
 
 #include "../../include/screen_handler/interface.hpp"
 
+std::string Interface::sender_login = "";
+
+bool Interface::ncurses_initialized = false;
+bool Interface::registration_state = false;
+
 Interface::Interface() {
   InitNcurses();
   SetupColors();

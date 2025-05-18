@@ -14,10 +14,10 @@ void ChatScreen::create_windows() {
   AbstractScreen::create_windows();
   int contacts_width = COLS / 4;
   contacts_win_ = derwin(main_win_, LINES, contacts_width, 0, 0);
-  chat_win_ = derwin(main_win_, LINES - 3, COLS - contacts_width,
-                     0, contacts_width);
-  input_win_ = derwin(main_win_, 3, COLS - contacts_width,
-                      LINES - 3, contacts_width);
+  chat_win_ =
+      derwin(main_win_, LINES - 3, COLS - contacts_width, 0, contacts_width);
+  input_win_ =
+      derwin(main_win_, 3, COLS - contacts_width, LINES - 3, contacts_width);
   keypad(input_win_, true);
   scrollok(chat_win_, true);
   wtimeout(input_win_, 100);
@@ -34,9 +34,7 @@ void ChatScreen::refresh() {
   draw_layout();
 }
 
-void ChatScreen::update_status(const std::string& sender) {
-  status_ = sender;
-}
+void ChatScreen::update_status(const std::string& sender) { status_ = sender; }
 
 void ChatScreen::update_username(const std::string& username) {
   username_ = username;
@@ -183,8 +181,8 @@ void ChatScreen::draw_contacts() {
   apply_color(contacts_win_, DEFAULT_PAIR, false);
   int line = 4;
   size_t start = 0;
-  while (start < status_.length() && line < static_cast<size_t>
-                                         (getmaxy(contacts_win_) - 1)) {
+  while (start < status_.length() &&
+         line < static_cast<size_t>(getmaxy(contacts_win_) - 1)) {
     size_t end = status_.find('\n', start);
     if (end == std::string::npos) {
       end = status_.length();
@@ -214,18 +212,18 @@ void ChatScreen::draw_chat() {
       if (end == std::string::npos) {
         end = message.text.length();
       }
-      mvwprintw(chat_win_, col++, 2, "%.*s",
-                static_cast<int>(end-pos), message.text.c_str()+pos);
+      mvwprintw(chat_win_, col++, 2, "%.*s", static_cast<int>(end - pos),
+                message.text.c_str() + pos);
       pos = end + 1;
     }
     apply_color(chat_win_, message.type, false);
   }
   if (scroll_position_ > 0 || end_msg < static_cast<int>(messages_.size())) {
     apply_color(chat_win_, DEFAULT_PAIR, true);
-    std::string scroll_ind = "^ " + std::to_string(scroll_position_+1)
-                             + "/" + std::to_string(messages_.size()) + " v";
-    mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_ind.length() - 1,
-              "%s", scroll_ind.c_str());
+    std::string scroll_ind = "^ " + std::to_string(scroll_position_ + 1) + "/" +
+                             std::to_string(messages_.size()) + " v";
+    mvwprintw(chat_win_, 0, getmaxx(chat_win_) - scroll_ind.length() - 1, "%s",
+              scroll_ind.c_str());
     apply_color(chat_win_, DEFAULT_PAIR, false);
   }
   wrefresh(chat_win_);
