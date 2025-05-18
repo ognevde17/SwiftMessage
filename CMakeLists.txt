@@ -48,6 +48,17 @@ set(CLIENT_SOURCES
     ${PROJECT_SOURCE_DIR}/src/client/interface.cpp
 )
 
+# ── interface ──────────────────────────────────────────
+set(INTERFACE_SOURCES
+    ${PROJECT_SOURCE_DIR}/src/screen_handler/interface.cpp
+    ${PROJECT_SOURCE_DIR}/src/screen_handler/abstract_screen.cpp
+    ${PROJECT_SOURCE_DIR}/src/screen_handler/greeting_screen.cpp
+    ${PROJECT_SOURCE_DIR}/src/screen_handler/sign_screen.cpp
+    ${PROJECT_SOURCE_DIR}/src/screen_handler/send_screen.cpp
+    ${PROJECT_SOURCE_DIR}/src/screen_handler/chat_screen.cpp
+    ${PROJECT_SOURCE_DIR}/src/screen_handler/popup.cpp
+)
+
 if (BUILD_SERVER)
     add_executable(${SERVER_NAME}
         ${PROJECT_SOURCE_DIR}/src/server/main.cpp
@@ -100,11 +111,7 @@ endif()
 if (BUILD_INTERFACE_TEST)
     add_executable(${INTERFACE_TEST_NAME}
         tests/screen_handler/test_interface.cpp
-        src/screen_handler/interface.cpp
-        src/screen_handler/sign_screen.cpp
-        src/screen_handler/chat_screen.cpp
-        src/screen_handler/greeting_screen.cpp
-        src/screen_handler/abstract_screen.cpp
+        ${INTERFACE_SOURCES}
     )
 
     target_link_libraries(${INTERFACE_TEST_NAME}

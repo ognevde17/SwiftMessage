@@ -6,59 +6,64 @@
 #include <iostream>
 
 #include "../../include/screen_handler/interface.hpp"
-#include "utils.hpp"
+#include "./utils.hpp"
 
 bool Interface::ncurses_initialized = false;
+bool Interface::registration_state = false;
+std::string Interface::sender_login = "server";
 
 int main() {
   try {
     Interface interface;
 
-    Result state = Result::None;
-    bool is_registration = false;
-    while (true) {
-      state = Interface::RenderGreeting();
-      if (state == Result::Register) {
-        is_registration = true;
-        break;
-      }
-      if (state == Result::Login) {
-        break;
-      }
-    }
+    Interface::RenderGreeting();
 
+    std::string status;
+    ColorPairs color = ACTIVE_PAIR;
     while (true) {
-      state = interface.RenderAR(is_registration,
-                                 is_registration ? "Registration" : "Authentication");
-//      state = interface.RenderAR(false, "Registration achieved");
-//      state = interface.RenderAR(true, "Error due registration", SYSTEM_NOTIFICATION_PAIR);
+      Result state = interface.RenderAR(status, color);
       if (state == Result::Register) {
-        continue;
+        status = "Registration achieved";
+        color = SYSTEM_NOTIFICATION_PAIR;
       }
       if (state == Result::Login || state == Result::Exit) {
         break;
       }
     }
-    auto user_data = interface.GetUserData();
 
+    auto user_data = interface.GetUserData();
     auto messages = utils::GenerateRandomMessages(testing_data::kMessagesCount);
+    auto sender = interface.RenderSendGetter();
 
     interface.RenderChat(std::move(messages));
     interface.DisplayAnnouncement("Logged as: " + user_data.login);
     interface.DisplayAnnouncement("Type exit to quit");
+    interface.DisplayAnnouncement("Sender is: " + sender);
 
     while (true) {
       auto user_input = interface.GetInputMessage();
+      if (user_input == "[[SEND]]") {
+        sender = interface.RenderSendGetter(true);
+        interface.DisplayAnnouncement("Chat swapped to: " + sender);
+        continue;
+      }
       if (user_input == "exit") {
         interface.DisplayAnnouncement("Disconnecting..");
         break;
       }
       if (user_input == "clear") {
         interface.ClearChat();
+        continue;
       }
       if (user_input == "random") {
-        messages = utils::GenerateRandomMessages(testing_data::kMessagesCount);
-        interface.UpdateMessages(messages);
+        messages = utils::GenerateRandomMessages(
+            testing_data::kMessagesUpdateCount);
+        interface.AddMessagesUpdate(messages);
+        continue;
+      }
+      if (user_input == "sender") {
+        interface.DisplayMessage(sender, "Test sender message");
+        continue;
       }
       if (user_input == "error") {
         interface.DisplayError("Testing error");

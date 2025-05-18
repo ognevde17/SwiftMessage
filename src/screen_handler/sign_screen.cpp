@@ -7,8 +7,8 @@
 
 SignScreen::SignScreen(bool is_registration, const std::string& status,
                        ColorPairs color)
-    : AbstractScreen(), is_registration_(is_registration),
-      status_message_(status), status_color_(color) {
+    : is_registration_(is_registration), status_message_(status),
+      status_color_(color) {
   post_create();
   refresh();
 }
@@ -39,7 +39,17 @@ void SignScreen::switch_screen() {
   refresh();
 }
 
-SignScreen::Result SignScreen::handle_input() {
+void SignScreen::update_screen(bool registration_state,
+                               const std::string& status, ColorPairs color) {
+  if (registration_state != is_registration_ && color != SYSTEM_NOTIFICATION_PAIR) {
+    switch_screen();
+  }
+  status_message_ = status.empty() ? status_message_ : status;
+  status_color_ = color;
+  refresh();
+}
+
+Result SignScreen::handle_input() {
   int ch = wgetch(content_win_);
   switch (ch) {
     case (KEY_RESIZE): {
@@ -57,13 +67,6 @@ SignScreen::Result SignScreen::handle_input() {
     case ('\n') :
     case (KEY_ENTER): {
       return handle_submit();
-    }
-    case (27) : {
-      return Result::Exit;
-    }
-    case (9): {
-      move_cursor(1);
-      return Result::None;
     }
     default: {
       handle_char(ch);
