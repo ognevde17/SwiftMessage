@@ -75,7 +75,7 @@ void Client::StartMessageLoop(const std::string& sender_login) {
     if (message == "[[SEND]]") {
       std::string sender = interface_.RenderSendGetter(true);
       rec = sender;
-      interface_.ClearChat();
+      // interface_.ClearChat();
       interface_.DisplayAnnouncement("Chat swapped to: " + sender);
       continue;
     } else {
@@ -100,7 +100,8 @@ void Client::Receive() {
       //std::cout << "OK2\n";
       SendMessageRequest data = SendMessageRequest::from_string(received);
       if (!data.message_text.empty()) {
-        interface_.DisplayMessage(data.sender_login, data.message_text);
+        // interface_.DisplayMessage(data.sender_login, data.message_text);
+        interface_.AddIncomingMessage(data.sender_login, data.message_text);
       }
       //std::cout << "OK3\n";
     } catch (const boost::system::system_error& e) {

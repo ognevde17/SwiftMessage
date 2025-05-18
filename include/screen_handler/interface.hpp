@@ -9,7 +9,7 @@
 #include "sign_screen.hpp"
 #include "send_screen.hpp"
 #include "chat_screen.hpp"
-
+#include <unordered_map>
 struct UserData {
   std::string username;
   std::string login;
@@ -36,6 +36,8 @@ class Interface {
 
   void AddMessagesUpdate(const std::vector<ChatScreenUI::Message>& messages);
 
+  void AddIncomingMessage(const std::string& from, const std::string& text);
+
   void DisplayAnnouncement(const std::string& message);
   void DisplayError(const std::string& message);
   void DisplayMessage(const std::string& sender, const std::string& message);
@@ -56,6 +58,8 @@ class Interface {
 
   void StopChatLoop();
   void ResumeChatLoop();
+
+  std::unordered_map<std::string, std::vector<ChatScreenUI::Message>> chat_history_;
 
   static std::string sender_login;
   static bool ncurses_initialized;
