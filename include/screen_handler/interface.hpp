@@ -1,4 +1,3 @@
-
 //
 // Created by sheyme on 03/04/25.
 //
@@ -30,12 +29,12 @@ class Interface {
   std::string RenderSendGetter(bool was_running = false);
 
   void RenderChat();
-  void RenderChat(std::vector<Message>&& messages);
-  void RenderChat(const std::vector<Message>& messages);
-  void UpdateMessages(std::vector<Message>&& messages);
-  void UpdateMessages(const std::vector<Message>& messages);
+  void RenderChat(std::vector<ChatScreenUI::Message>&& messages);
+  void RenderChat(const std::vector<ChatScreenUI::Message>& messages);
+  void UpdateMessages(std::vector<ChatScreenUI::Message>&& messages);
+  void UpdateMessages(const std::vector<ChatScreenUI::Message>& messages);
 
-  void AddMessagesUpdate(const std::vector<Message>& messages);
+  void AddMessagesUpdate(const std::vector<ChatScreenUI::Message>& messages);
 
   void DisplayAnnouncement(const std::string& message);
   void DisplayError(const std::string& message);
@@ -65,7 +64,7 @@ class Interface {
   UserData user_data_;
   SignScreen* sign_screen_{nullptr};
   ChatScreen* chat_screen_{nullptr};
-  std::vector<Message> chat_backup_;
+  std::vector<ChatScreenUI::Message> chat_backup_;
 };
 
 #endif //SWIFTMESSAGE_SRC_SCREEN_HANDLER_INTERFACE_HPP_

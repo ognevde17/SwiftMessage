@@ -1,4 +1,3 @@
-
 //
 // Created by sheyme on 24/04/25.
 //
@@ -105,27 +104,27 @@ void Interface::RenderChat() {
   chat_screen_->refresh();
 }
 
-void Interface::RenderChat(std::vector<Message>&& messages) {
+void Interface::RenderChat(std::vector<ChatScreenUI::Message>&& messages) {
   RenderChat();
   UpdateMessages(std::move(messages));
 }
 
-void Interface::RenderChat(const std::vector<Message>& messages) {
+void Interface::RenderChat(const std::vector<ChatScreenUI::Message>& messages) {
   RenderChat();
   UpdateMessages(messages);
 }
 
-void Interface::UpdateMessages(std::vector<Message>&& messages) {
-  chat_screen_->load_messages(std::forward<std::vector<Message>>(messages));
+void Interface::UpdateMessages(std::vector<ChatScreenUI::Message>&& messages) {
+  chat_screen_->load_messages(std::forward<std::vector<ChatScreenUI::Message>>(messages));
   chat_screen_->refresh();
 }
 
-void Interface::UpdateMessages(const std::vector<Message>& messages) {
+void Interface::UpdateMessages(const std::vector<ChatScreenUI::Message>& messages) {
   chat_screen_->load_messages(messages);
   chat_screen_->refresh();
 }
 
-void Interface::AddMessagesUpdate(const std::vector<Message>& messages) {
+void Interface::AddMessagesUpdate(const std::vector<ChatScreenUI::Message>& messages) {
   chat_screen_->add_messages_update(messages);
   chat_screen_->refresh();
 }
