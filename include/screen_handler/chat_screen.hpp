@@ -9,6 +9,7 @@
 
 #include "abstract_screen.hpp"
 
+namespace ChatScreenUI {
 struct Message {
   Message() = default;
 
@@ -18,6 +19,7 @@ struct Message {
   std::string text;
   ColorPairs type;
 };
+} // namespace ChatScreenUI
 
 class ChatScreen : public AbstractScreen {
  public:
@@ -35,16 +37,16 @@ class ChatScreen : public AbstractScreen {
   std::string get_current_input();
 
   void refresh() override;
-  void load_messages(std::vector<Message>&& messages);
-  void load_messages(const std::vector<Message>& messages);
+  void load_messages(std::vector<ChatScreenUI::Message>&& messages);
+  void load_messages(const std::vector<ChatScreenUI::Message>& messages);
   void add_message(const std::string& message, ColorPairs type = DEFAULT_PAIR);
 
-  void add_messages_update(const std::vector<Message>& messages);
+  void add_messages_update(const std::vector<ChatScreenUI::Message>& messages);
 
   void update_status(const std::string& sender);
   void update_username(const std::string& username);
 
-  std::vector<Message> get_chat() const { return messages_; }
+  std::vector<ChatScreenUI::Message> get_chat() const { return messages_; }
 
   void clear_chat();
   ~ChatScreen() override;
@@ -78,7 +80,7 @@ class ChatScreen : public AbstractScreen {
   std::string username_;
 
   std::string current_input_;
-  std::vector<Message> messages_;
+  std::vector<ChatScreenUI::Message> messages_;
   const int kMaxMessages = 1000;
 };
 

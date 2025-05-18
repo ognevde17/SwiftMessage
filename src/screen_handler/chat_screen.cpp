@@ -40,15 +40,15 @@ void ChatScreen::update_username(const std::string& username) {
   username_ = username;
 }
 
-void ChatScreen::load_messages(std::vector<Message>&& messages) {
+void ChatScreen::load_messages(std::vector<ChatScreenUI::Message>&& messages) {
   messages_ = std::move(messages);
 }
 
-void ChatScreen::load_messages(const std::vector<Message>& messages) {
+void ChatScreen::load_messages(const std::vector<ChatScreenUI::Message>& messages) {
   messages_ = messages;
 }
 
-void ChatScreen::add_messages_update(const std::vector<Message>& messages) {
+void ChatScreen::add_messages_update(const std::vector<ChatScreenUI::Message>& messages) {
   messages_.insert(messages_.end(), messages.begin(), messages.end());
   scroll_position_ =
       std::max(0, static_cast<int>(messages_.size()) - getmaxy(chat_win_) + 2);
