@@ -20,7 +20,7 @@ class Client {
 
   void SendMessage(const std::string& sender_login, const std::string& rec_login, const std::string& message);
 
-  void StartMessageLoop(const std::string& sender_login, const std::string& rec_login);
+  void StartMessageLoop(const std::string& sender_login);
 
   void Receive();
 

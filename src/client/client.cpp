@@ -52,17 +52,37 @@ void Client::SendMessage(const std::string& sender_login,
   // std::cout << "Успешно отправлено: " << message << std::endl;
 }
 
-void Client::StartMessageLoop(const std::string& sender_login, 
-                             const std::string& rec_login) {
+// void Client::StartMessageLoop(const std::string& sender_login, 
+//                              const std::string& rec_login) {
+//   is_running_ = true;
+//   while (is_running_) {
+//     auto message = interface_.GetInputMessage();
+//     if (message == "endendend") {
+//       Disconnect();
+//       break;
+//     }
+//     //std::cout << "DOSENDMES\n";
+//     SendMessage(sender_login, rec_login, message);
+//     //std::cout << "POSLESENDMES\n";
+//   }
+// }
+
+void Client::StartMessageLoop(const std::string& sender_login) {
   is_running_ = true;
+  std::string rec = "";
   while (is_running_) {
     auto message = interface_.GetInputMessage();
-    if (message == "endendend") {
-      Disconnect();
-      break;
+    if (message == "[[SEND]]") {
+      std::string sender = interface_.RenderSendGetter(true);
+      rec = sender;
+      interface_.ClearChat();
+      interface_.DisplayAnnouncement("Chat swapped to: " + sender);
+      continue;
+    } else {
+      SendMessage(sender_login, rec, message);
     }
     //std::cout << "DOSENDMES\n";
-    SendMessage(sender_login, rec_login, message);
+
     //std::cout << "POSLESENDMES\n";
   }
 }
@@ -193,5 +213,5 @@ void Client::Run() {
   StartReceive();
   
   //interface_.DisplayAnnouncement("Начало чата с " + recipient);
-  StartMessageLoop(user_login_, recipient);
+  StartMessageLoop(user_login_);
 }
