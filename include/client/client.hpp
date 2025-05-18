@@ -3,7 +3,8 @@
 #include <thread>
 
 #include "connection_manager.hpp"
-#include "screen_handler/interface.hpp"
+#include "../screen_handler/interface.hpp"
+
 class Client {
  public:
   Client(const std::string& server_ip, const std::string& server_port);
