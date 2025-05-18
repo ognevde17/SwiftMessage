@@ -16,16 +16,21 @@ add_executable(SwiftMessage_Tests
     full_scenario_test.cpp
     ${SERVER_SOURCES}
     ${CLIENT_SOURCES}
+    ${INTERFACE_SOURCES}
 )
 
 target_include_directories(SwiftMessage_Tests PRIVATE
-    ${PROJECT_SOURCE_DIR}/include)
+    ${PROJECT_SOURCE_DIR}/include
+    ${CURSES_INCLUDE_DIR}
+)
 
 target_link_libraries(SwiftMessage_Tests PRIVATE
     GTest::gtest_main
     Boost::system Boost::thread Boost::serialization
     ${PQXX_LIB} ${PostgreSQL_LIBRARIES}
-    pthread)
+    pthread
+    ${CURSES_LIBRARIES}
+)
 
 # ─────────────────────────── регистрация в CTest ───────────────────────────
 enable_testing()
