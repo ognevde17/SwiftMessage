@@ -7,7 +7,8 @@
 
 SignScreen::SignScreen(bool is_registration, const std::string& status,
                        ColorPairs color)
-    : is_registration_(is_registration), status_message_(status),
+    : is_registration_(is_registration),
+      status_message_(status),
       status_color_(color) {
   post_create();
   refresh();
@@ -41,7 +42,8 @@ void SignScreen::switch_screen() {
 
 void SignScreen::update_screen(bool registration_state,
                                const std::string& status, ColorPairs color) {
-  if (registration_state != is_registration_ && color != SYSTEM_NOTIFICATION_PAIR) {
+  if (registration_state != is_registration_ &&
+      color != SYSTEM_NOTIFICATION_PAIR) {
     switch_screen();
   }
   status_message_ = status.empty() ? status_message_ : status;
@@ -64,11 +66,11 @@ Result SignScreen::handle_input() {
       move_cursor(1);
       return Result::None;
     }
-    case ('\n') :
+    case ('\n'):
     case (KEY_ENTER): {
       return handle_submit();
     }
-    case (27) : {
+    case (27): {
       return Result::Exit;
     }
     case (9): {
@@ -82,9 +84,7 @@ Result SignScreen::handle_input() {
   }
 }
 
-void SignScreen::create_windows() {
-  AbstractScreen::create_windows();
-}
+void SignScreen::create_windows() { AbstractScreen::create_windows(); }
 
 void SignScreen::handle_resize() {
   delwin(main_win_);
@@ -131,14 +131,19 @@ void SignScreen::move_cursor(int direction) {
 std::string* SignScreen::get_current_field() {
   if (is_registration_) {
     switch (current_field_) {
-      case (0): return &username_;
-      case (1): return &login_;
-      case (2): return &password_;
+      case (0):
+        return &username_;
+      case (1):
+        return &login_;
+      case (2):
+        return &password_;
     }
   } else {
     switch (current_field_) {
-      case (0): return &login_;
-      case (1): return &password_;
+      case (0):
+        return &login_;
+      case (1):
+        return &password_;
     }
   }
   return nullptr;
@@ -181,8 +186,8 @@ void SignScreen::draw_status() {
 
 void SignScreen::draw_field(const std::string& label, const std::string& value,
                             int x, int y, int field_num) {
-  ColorPairs current_color = (field_num == current_field_)
-      ? ACTIVE_PAIR : DEFAULT_PAIR;
+  ColorPairs current_color =
+      (field_num == current_field_) ? ACTIVE_PAIR : DEFAULT_PAIR;
   apply_color(content_win_, current_color, true);
   mvwprintw(content_win_, y, x, "%s", label.c_str());
   wprintw(content_win_, "[%-20s]", value.c_str());
@@ -195,18 +200,24 @@ void SignScreen::draw_fields() {
   if (is_registration_) {
     draw_field("Username:", username_, x, y, 0);
     draw_field("Login:   ", login_, x, y + 2, 1);
-    draw_field("Password:", password_, x, y + 4, 2);
+    {
+      std::string masked(password_.size(), '*');
+      draw_field("Password:", masked, x, y + 4, 2);
+    }
   } else {
     draw_field("Login:   ", login_, x, y, 0);
-    draw_field("Password:", password_, x, y + 2, 1);
+    {
+      std::string masked(password_.size(), '*');
+      draw_field("Password:", masked, x, y + 2, 1);
+    }
   }
 }
 
 void SignScreen::draw_switcher() {
   int x = (COLS / 2) - 4;
   int y = (LINES / 2) - (is_registration_ ? 0 : 1);
-  ColorPairs current_color = current_field_ == (is_registration_ ? 3 : 2)
-      ? ACTIVE_PAIR : DEFAULT_PAIR;
+  ColorPairs current_color =
+      current_field_ == (is_registration_ ? 3 : 2) ? ACTIVE_PAIR : DEFAULT_PAIR;
   apply_color(content_win_, current_color, true);
   if (is_registration_) {
     mvwprintw(content_win_, y, x, "Sign In");
@@ -219,8 +230,8 @@ void SignScreen::draw_switcher() {
 void SignScreen::draw_submit_button() {
   int x = COLS / 2;
   int y = (LINES / 2) - (is_registration_ ? -3 : -1);
-  ColorPairs current_color = current_field_ == (is_registration_ ? 4 : 3)
-      ? ACTIVE_PAIR : DEFAULT_PAIR;
+  ColorPairs current_color =
+      current_field_ == (is_registration_ ? 4 : 3) ? ACTIVE_PAIR : DEFAULT_PAIR;
   draw_button(content_win_, x, y, current_color, " Submit ");
 }
 
