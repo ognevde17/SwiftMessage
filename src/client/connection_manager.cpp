@@ -12,9 +12,9 @@ ClientConnectionManager::ClientConnectionManager(std::string ip,
 bool ClientConnectionManager::Connect() {
   try {
     tcp::resolver resolver(io_context);
-    std::cout << "OK1" << std::endl;
+    // std::cout << "OK1" << std::endl;
     boost::asio::connect(socket, resolver.resolve(ip, port));
-    std::cout << "OK2" << std::endl;
+    // std::cout << "OK2" << std::endl;
     is_connected = true;
     return true;
   } catch (...) {
